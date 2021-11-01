@@ -43,20 +43,20 @@ With **AVPlayerViewController** use **initAVPlayerViewController** method and if
 Add **MetaData** as per your requirement which can elivate your Insights. It allows you to filter your analytics data based on important fields. Gumlet allows metadata for user, player and video via **GumletInsightsCustomUserData**, **GumletInsightsCustomPlayerData** and  **GumletInsightsCustomVideoData**
 
 ```sh
- let gumletConfig = GumletInsightsConfig()
+ var gumletConfig = GumletInsightsConfig()
  gumletConfig.proprtyId = "Your Property ID"
  
- let userData = GumletInsightsCustomUserData()
+ var userData = GumletInsightsCustomUserData()
  userData.userName =“Gumlet”
  userData.userEmail = “support@gumlet.com”
  userData.userCountry = “India”
 
- let customVideoData = GumletInsightsCustomVideoData()
+ var customVideoData = GumletInsightsCustomVideoData()
  customVideoData.customContentType = “kids”
  customVideoData.customVideoTitle = “Peppa Pig”
  customVideoData.customVideoLanguage = “English”
 
- let playerData = GumletInsightsCustomPlayerData()
+ var playerData = GumletInsightsCustomPlayerData()
  playerData.GumletPlayerName = “AVPlayer”  
  playerData.GumletPlayerIntegrationVersion = “1.0”
  playerData.gumletPageType = “AVPlayerViewController” 

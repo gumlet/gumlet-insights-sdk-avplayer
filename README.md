@@ -1,4 +1,4 @@
-# gumlet-Insights-avplayer
+# Gumlet-Insights-SDK- AVPlayer
 
 Gumlet Insights integration with AVPlayer for iOS native applications. This Insights enables you to get useful data about video usage in your apps. **AVPlayer** is an iOS native feature to manage the playback. AVPlayer are two approaches **AVPlayerLayer** and **AVPlayerViewController**. This integration is built on **SWIFT**, allowing thinner wrappers for player.
 
@@ -18,7 +18,7 @@ Gumlet Insights is available through CocoaPods and Swift package Manager.
 ### Install Gumlet Insights SDK with Swift Package Manager(SwiftPM)
  
 1. In Xcode click **“File”** > **”Swift Packages”** > **“Add Package Dependency…”**
-2. The package repository URL is - https://github.com/gumlet/gumlet-Insights-avplayer.git
+2. The package repository URL is - https://github.com/gumlet/gumlet-insights-sdk-avplayer.git
 3. Click **Next**
 4. Select default **version** of the package **up to next major**, version and click **Next**
 5. Xcode downloads the Gumlet Insights package to the your app target.

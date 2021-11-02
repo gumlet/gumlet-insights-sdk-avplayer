@@ -1,4 +1,0 @@
-framework module GumletInsightsAVPlayer {
-  header "GumletInsightsAVPlayer-Swift.h"
-  requires objc
-}

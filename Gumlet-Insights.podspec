@@ -10,15 +10,22 @@ Pod::Spec.new do |spec|
     Gumlet Insights SDK integration with AVPlayer for native iOS applications. This analytics enables you to get useful data about video usage in your apps.
                    DESC
 
+
   spec.homepage     = "http://gumlet.com"
   spec.license         = "MIT"
   spec.author       = { "Gumlet" => "support@gumlet.com" }
   spec.ios.deployment_target = "13.0"
   spec.swift_version = "4.2"
-  spec.source = { :git => "https://github.com/gumlet/gumlet-insights-avplayer.git", :tag => "#{spec.version}" }
-  spec.source_files  =  "GumletInsightsAVPlayer/**/*.{h,m,swift}"
-  spec.requires_arc = true
+  spec.static_framework = true
+  spec.source = { :git => "https://github.com/gumlet/gumlet-insights-sdk-avplayer.git", :tag => "#{spec.version}" }
 
+  
+  spec.ios.vendored_frameworks = 'GumletInsightsAVPlayer.xcframework'
+  
+  
+
+  spec.requires_arc = true
+  
  
 end
 

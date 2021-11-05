@@ -18,12 +18,7 @@ struct GumletInsightsManager {
     
     //    let gumletEnvironment_Key = "gHkjn8r"
     let gumletSDK_version = "1.0.0"
-    let video_base_url = "https://video-analytics-ingest.gumlet.com" //"http://video-analytics-ingest.gumlet.com?"
-    
-    
-    
-    
-    
+    let video_base_url = "https://video-analytics-ingest.gumlet.com?" //"http://video-analytics-ingest.gumlet.com?"
     
     
     //MARK:--get device information

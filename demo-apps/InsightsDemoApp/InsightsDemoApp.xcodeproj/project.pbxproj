@@ -13,7 +13,7 @@
 		1933336D26D7CE110054D6EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1933336C26D7CE110054D6EE /* Assets.xcassets */; };
 		1933337026D7CE110054D6EE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1933336E26D7CE110054D6EE /* LaunchScreen.storyboard */; };
 		19DC5EF526E5F94C000DD762 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19DC5EF426E5F94C000DD762 /* ViewController.swift */; };
-		19E85AF52736A9E900880E7B /* GumletInsightsAVPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 19E85AF42736A9E900880E7B /* GumletInsightsAVPlayer */; };
+		19E85AFE2737605B00880E7B /* GumletInsightsAVPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 19E85AFD2737605B00880E7B /* GumletInsightsAVPlayer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,7 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				19E85AF52736A9E900880E7B /* GumletInsightsAVPlayer in Frameworks */,
+				19E85AFE2737605B00880E7B /* GumletInsightsAVPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,7 +124,7 @@
 			);
 			name = InsightsDemoApp;
 			packageProductDependencies = (
-				19E85AF42736A9E900880E7B /* GumletInsightsAVPlayer */,
+				19E85AFD2737605B00880E7B /* GumletInsightsAVPlayer */,
 			);
 			productName = GumletVideoAnalytics;
 			productReference = 1933336026D7CDFC0054D6EE /* InsightsDemoApp.app */;
@@ -154,7 +154,7 @@
 			);
 			mainGroup = 1933335726D7CDFC0054D6EE;
 			packageReferences = (
-				19E85AF32736A9E900880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */,
+				19E85AFC2737605B00880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */,
 			);
 			productRefGroup = 1933336126D7CDFC0054D6EE /* Products */;
 			projectDirPath = "";
@@ -443,9 +443,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		19E85AF32736A9E900880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */ = {
+		19E85AFC2737605B00880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/gumlet/gumlet-insights-sdk-avplayer.git";
+			repositoryURL = "https://github.com/gumlet/gumlet-insights-sdk-avplayer";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -454,9 +454,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		19E85AF42736A9E900880E7B /* GumletInsightsAVPlayer */ = {
+		19E85AFD2737605B00880E7B /* GumletInsightsAVPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 19E85AF32736A9E900880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */;
+			package = 19E85AFC2737605B00880E7B /* XCRemoteSwiftPackageReference "gumlet-insights-sdk-avplayer" */;
 			productName = GumletInsightsAVPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -8,7 +8,7 @@
 import UIKit
 import AVKit
 import AVFoundation
-
+import GumletInsightsAVPlayer
 //import GumletSDKVidAnalytics
 
 
@@ -49,28 +49,28 @@ class ViewController: UIViewController {
        
         //Add PropertyId
         var gumletConfig = GumletInsightsConfig()
-        gumletConfig.proprtyId = "enter your property Id" //Get new Property Id from dashboard.
+        gumletConfig.proprtyId = "G8l9IeDh" //Get new Property Id from dashboard.
         
         //Add playerData
-        let playerData = GumletInsightsCustomPlayerData()
+        var playerData = GumletInsightsCustomPlayerData()
         playerData.gumletPageType = "AVPlayerViewController"
         playerData.GumletPlayerIntegrationVersion = "1.0.0"
         playerData.GumletPlayerName = "AVPlayer"
         
         //Add videoData
-        let videoData = GumletInsightsCustomVideoData();
-        videoData.custom_video_title = "peppa pig";
-        videoData.custom_video_id = "123"
-        videoData.custom_video_producer = "Jhon Peppa"
+        var videoData = GumletInsightsCustomVideoData();
+        videoData.customVideotitle = "peppa pig";
+        videoData.customVideoId = "123"
+        videoData.customVideoProducer = "Jhon Peppa"
         
         //Add userData
-        let userData = GumletInsightsUserData()
-        userData.user_name = "Den Brown"
-        userData.user_email = "DenBrown@gmail.com"
-        userData.user_country = "United Kingdom"
+        var userData = GumletInsightsUserData()
+        userData.userName = "Den Brown"
+        userData.userEmail = "DenBrown@gmail.com"
+        userData.userCountry = "United Kingdom"
      
         //Add Gumlet video analytics SDK init method
-        GumletInsightsSDK.initAVPlayerViewController(playerVC, userData:userData, customPlayerData: playerData, customVideoData:videoData, config: gumletConfig)
+        GumletInsightsSDK.initAVPlayerViewController(playerVC, userData:userData, customVideoData:videoData, customPlayerData: playerData, config: gumletConfig)
     }
     
    

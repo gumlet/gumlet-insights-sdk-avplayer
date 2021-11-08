@@ -9,9 +9,19 @@ Gumlet Insights is available through CocoaPods and Swift package Manager.
  1. Create Podfile or modify Podfile to use SDK(frameworks) by using use_frameworks!
  2. Add the pod inside the Podfile
   ```sh
-   def GumletInsightsSDKAVPlayer
-    pod  ‘GumletInsightsSDKAVPlayer’ , ‘1.0.0’
-   end
+   # platform :ios, '13.0'
+
+	source 'https://github.com/gumlet/gumlet-insights-sdk-avplayer.git'
+
+target 'InsightsDemoApp' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for InsightsDemoApp
+	pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
+
+end
+
   ```
  3. Run **pod repo update** to add the newly added source and run **Pod install** to install it.
  4. import SDK on your file

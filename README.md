@@ -18,7 +18,9 @@ target 'InsightsDemoApp' do
   use_frameworks!
 
   # Pods for InsightsDemoApp
-	pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
+	pod 'GumletInsightsSDKAVPlayer', :git => "https://github.com/gumlet/gumlet-insights-sdk-avplayer.git"
+
+
 
 end
 

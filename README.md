@@ -38,8 +38,9 @@ end
 3. Click **Next**
 4. Select default **Branch** of the package **main** and click **Next**
 5. Xcode downloads the Gumlet Insights package to the your app target.
-6. ```sh
-   import GumletInsightsSDKAVPlayer
+6. import SDK on your file
+  ```sh
+   import GumletInsightsAVPlayer
   ```
 7. Click **Finish**.
 

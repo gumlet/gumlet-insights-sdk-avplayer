@@ -11,7 +11,7 @@ Gumlet Insights is available through CocoaPods and Swift package Manager.
   ```sh
    # platform :ios, '13.0'
 
-	source 'https://github.com/gumlet/gumlet-insights-sdk-avplayer.git'
+	
 
 target 'InsightsDemoApp' do
   # Comment the next line if you don't want to use dynamic frameworks

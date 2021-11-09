@@ -32,7 +32,7 @@ end
 ### Install Gumlet Insights SDK with Swift Package Manager(SwiftPM)
  
 1. In Xcode click **“File”** > **”Swift Packages”** > **“Add Package Dependency…”**
-2. The package repository URL is - https://github.com/gumlet/gumlet-Insights-avplayer.git
+2. The package repository URL is - https://github.com/gumlet/gumlet-insights-sdk-avplayer.git
 3. Click **Next**
 4. Select default **Branch** of the package **main** and click **Next**
 5. Xcode downloads the Gumlet Insights package to the your app target.

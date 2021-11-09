@@ -1,0 +1,16 @@
+PODS:
+  - GumletInsightsSDKAVPlayer (1.0.0)
+
+DEPENDENCIES:
+  - GumletInsightsSDKAVPlayer (~> 1.0.0)
+
+SPEC REPOS:
+  https://github.com/gumlet/gumlet-insights-sdk-avplayer.git:
+    - GumletInsightsSDKAVPlayer
+
+SPEC CHECKSUMS:
+  GumletInsightsSDKAVPlayer: 4f2ce47b8eff97dd904a52de4d54b4096fb6507f
+
+PODFILE CHECKSUM: e7a3570cc85b17df9a8228eb6577afe95103794c
+
+COCOAPODS: 1.11.2

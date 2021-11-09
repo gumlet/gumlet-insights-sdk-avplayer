@@ -38,7 +38,10 @@ end
 3. Click **Next**
 4. Select default **Branch** of the package **main** and click **Next**
 5. Xcode downloads the Gumlet Insights package to the your app target.
-6. Click **Finish**.
+6. ```sh
+   import GumletInsightsSDKAVPlayer
+  ```
+7. Click **Finish**.
 
 ## Step 2: Setup the Gumlet Insights to the your app
 Get Property ID from [gumlet dashboard](https://www.gumlet.com/dashboard/video/insights/properties).

@@ -15,7 +15,7 @@ use_frameworks!
 target 'InsightsDemoApp' do
 
   # Pods for InsightsDemoApp
-	pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
+	pod 'GumletInsightsSDKAVPlayer', '~>1.0'
     
 end
 

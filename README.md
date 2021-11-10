@@ -11,16 +11,12 @@ Gumlet Insights is available through CocoaPods and Swift package Manager.
   ```sh
    # platform :ios, '13.0'
 
-	
-
 target 'InsightsDemoApp' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
   # Pods for InsightsDemoApp
-	pod 'GumletInsightsSDKAVPlayer', :git => "https://github.com/gumlet/gumlet-insights-sdk-avplayer.git"
-
-
+	pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
 
 end
 

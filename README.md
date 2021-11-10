@@ -1,6 +1,6 @@
-# gumlet-Insights-avplayer
+# gumlet-insights-sdk-avplayer
 
-Gumlet Insights integration with AVPlayer for iOS native applications. This Insights enables you to get useful data about video usage in your apps. **AVPlayer** is an iOS native feature to manage the playback. AVPlayer are two approaches **AVPlayerLayer** and **AVPlayerViewController**. This integration is built on **SWIFT**, allowing thinner wrappers for player.
+Gumlet Insights integration with AVPlayer for iOS native applications. This Insights enables you to get useful data about video usage in your apps. **AVPlayer** is an iOS native feature to manage the playback. AVPlayer are two approaches **AVPlayerLayer** and **AVPlayerViewController**.
 
 ## Step 1: Add the SDK to the Project
 Gumlet Insights is available through CocoaPods and Swift package Manager.
@@ -8,16 +8,15 @@ Gumlet Insights is available through CocoaPods and Swift package Manager.
 ### Install Gumlet Insights SDK with Cocoapods
  1. Create Podfile or modify Podfile to use SDK(frameworks) by using use_frameworks!
  2. Add the pod inside the Podfile
-  ```sh
-   # platform :ios, '13.0'
+```sh
+# platform :ios, '13.0'
+use_frameworks!
 
 target 'InsightsDemoApp' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
 
   # Pods for InsightsDemoApp
 	pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
-
+    
 end
 
   ```
@@ -45,7 +44,7 @@ Get Property ID from [gumlet dashboard](https://www.gumlet.com/dashboard/video/i
 
 With **AVPlayerViewController** use **initAVPlayerViewController** method and if you are using  **AVPlayerLayer** , use **initAVPlayerLayer** method instead.
 
-```sh
+```swift
  let playerVC = AVPlayerViewController()
 
  let gumletConfig = GumletInsightsConfig()
@@ -58,7 +57,7 @@ With **AVPlayerViewController** use **initAVPlayerViewController** method and if
 
 Add **MetaData** as per your requirement which can elivate your Insights. It allows you to filter your analytics data based on important fields. Gumlet allows metadata for user, player and video via **GumletInsightsCustomUserData**, **GumletInsightsCustomPlayerData** and  **GumletInsightsCustomVideoData**
 
-```sh
+```swift
  let gumletConfig = GumletInsightsConfig()
  gumletConfig.proprtyId = "Your Property ID"
  

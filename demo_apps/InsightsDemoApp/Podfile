@@ -1,13 +1,13 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+# platform :ios, '13.0'
 
+<<<<<<< HEAD
  # source 'https://github.com/gumlet/gumlet-insights-sdk-avplayer.git'
+=======
+use_frameworks!
+>>>>>>> c01efcbadf30cb987a9e0c916f5ab6335ab3e3f9
 
 target 'InsightsDemoApp' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for InsightsDemoApp
   
   pod 'GumletInsightsSDKAVPlayer', '~>1.0.0'
 

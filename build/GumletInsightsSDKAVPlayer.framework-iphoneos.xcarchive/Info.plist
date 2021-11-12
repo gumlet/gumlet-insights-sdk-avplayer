@@ -5,10 +5,10 @@
 	<key>ArchiveVersion</key>
 	<integer>2</integer>
 	<key>CreationDate</key>
-	<date>2021-11-08T19:00:06Z</date>
+	<date>2021-11-12T11:27:50Z</date>
 	<key>Name</key>
-	<string>GumletInsightsAVPlayer</string>
+	<string>GumletInsightsSDKAVPlayer</string>
 	<key>SchemeName</key>
-	<string>GumletInsightsAVPlayer</string>
+	<string>GumletInsightsSDKAVPlayer</string>
 </dict>
 </plist>

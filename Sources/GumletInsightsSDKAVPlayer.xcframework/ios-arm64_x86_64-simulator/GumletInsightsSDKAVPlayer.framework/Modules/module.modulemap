@@ -1,0 +1,4 @@
+framework module GumletInsightsSDKAVPlayer {
+  header "GumletInsightsSDKAVPlayer-Swift.h"
+  requires objc
+}

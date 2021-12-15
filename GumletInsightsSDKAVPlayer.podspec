@@ -4,12 +4,12 @@ Pod::Spec.new do |spec|
  
 
   spec.name                 = "GumletInsightsSDKAVPlayer"
-  spec.version              = "1.0.1"
+  spec.version              = "1.0.3"
   spec.summary              = "GumletInsightSDK  integration with AVPlayer for native iOS applications."
 
   spec.description          = 'GumletInsightSDK integration with AVPlayer for native iOS applications. This analytics enables you to get useful data about video usage in your apps.'
 
-  spec.homepage             = "https://www.gumlet.com"
+  spec.homepage             = "https://github.com/gumlet/gumlet-insights-sdk-avplayer"
   spec.social_media_url     = 'https://twitter.com/gumlethq'
  
   spec.license              = "MIT"

@@ -1015,7 +1015,6 @@ public class AVPlayerCore: NSObject {
                 
                 let request_start = Int(Date().timeIntervalSince1970)
                 let request_response_start = Int(Date().timeIntervalSince1970)
-                )
                 let request_response_end = Int(Date().timeIntervalSince1970)
                 let requestError = errorEvent!.errorDomain;
                 let request_type = "event_requestfailed";

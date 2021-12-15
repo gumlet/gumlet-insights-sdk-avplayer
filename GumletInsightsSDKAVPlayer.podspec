@@ -22,7 +22,7 @@ Pod::Spec.new do |spec|
   spec.source               = { :git => "https://github.com/gumlet/gumlet-insights-sdk-avplayer.git",
                                 :tag => "#{spec.version}" }
 
-  spec.source_files         = "GumletInsightsAVPlayer/**/*.{h,m,swift}"
+  spec.source_files         = "GumletInsightsSDKAVPlayer/**/*.{h,m,swift}"
   spec.requires_arc         = true
 
 end

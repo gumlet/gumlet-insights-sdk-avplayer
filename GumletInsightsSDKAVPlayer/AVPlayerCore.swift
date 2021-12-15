@@ -1,5 +1,5 @@
 //
-//  AVPlayerCore.swift
+//  ViewController.swift
 //  GumletVideoAnalytics
 //
 
@@ -28,56 +28,6 @@ public class AVPlayerCore: NSObject {
     var timeOfUpdate :CFAbsoluteTime = 0.0
     
     let eventUpdatePlaybackTime = 3.0
-    
-    enum Events : String
-    {
-        case isPlayerSetup = "event_player_setup"
-        case isPlayerReady = "event_player_ready"
-        case isPlay = "event_play"
-        
-        case isPlaying = "event_playing"
-        case isPlaybackStarted = "event_playback_started"
-        case isUpdatePlayback = "event_playback_update"
-        
-        case isPaused = "event_paused"
-        case isBufferingStart = "event_rebuffer_start"
-        case isBufferingEnd = "event_rebuffer_end"
-        
-        case isEnd = "event_end"
-        //        case isSeeking = "event_seeking"
-        case isSeek = "event_seeked"
-        
-        case isMute = "event_mute"
-        case isUnMute = "event_unmute"
-        case isFullScreenStart = "event_fullscreen_started"
-        
-        case isFullScreenEnd = "event_fullscreen_ended"
-        case isDeviceOrientationChange = "event_device_orientation_changed"
-        case isScreenCastStart = "event_casting_started"
-        
-        case isScreenCastEnd = "event_casting_ended"
-        case isVideochange = "event_video_change"
-        case isQualityChange = "event_quality_change"
-        case isEventError = "event_error"
-    }
-    
-    
-    enum GumletPlayerState : String {
-        
-        case GumletPlayerStateReady = "Ready"
-        case GumletPlayerStateViewinit = "Init"
-        case GumletPlayerStatePlay = "Play"
-        
-        
-        case GumletPlayerStateBuffering = "Buffering"
-        case GumletPlayerStatePlaying = "Playing"
-        case GumletPlayerStatePaused = "Paused"
-        
-        case GumletPlayerStateError = "Error"
-        case GumletPlayerStateViewEnd = "End"
-        
-    }
-    
     
     var sessionId :String = ""
     var uniqueId :String = ""
@@ -111,24 +61,38 @@ public class AVPlayerCore: NSObject {
     var play_current_time:Double = 0.0
     var pause_current_time:Double = 0.0
     var videoTotalTime :Double = 0.0
+    public var currentTimeEpoch : Double = 0.0
     
     var _lastTransferEventCount : Int8 = 0
     var _lastTransferDuration : Double = 0.0
     var _lastTransferredBytes : Int64 = 0
+    
+    
     
     var isBuffer :Bool = false
     var isSeeking :Bool = false
     var isOrientationChange: Bool = false
     var isEventsetup : Bool = true
     var isQualitychange :Bool = false
+    var isVideoQualityChange : Bool = false
+    var isVideoChange : Bool =  false
     
     var videoMuted :Bool = false
     var videoUnMuted : Bool = false
     var isFullScreen :Bool = false
-    var isPlaybackStarted :Bool = false
+    public var isPlaybackStarted :Bool = true
     var isplaybackFinish :Bool = false
     var isorientationFirst : Bool = true
     var isSessionId : Bool = true
+   public var eventCollection : [String] = ["event_player_setup",
+                                                                "event_player_ready",
+                                                                "event_play",
+                                                                "event_playing",
+                                                                "event_rebuffer_start",
+                                                                "event_rebuffer_end",
+                                                                "event_paused","event_end","event_video_change","event_device_orientation_changed","event_quality_change"]
+    public var eventArr : [String] = []
+
     
     var errorTitle:String = ""
     var errorMessage:String = ""
@@ -136,6 +100,7 @@ public class AVPlayerCore: NSObject {
     
     // init Gumlet Video Manager
     var videAnaManager = GumletInsightsManager()
+    let gumletTranstion = GumletTransition(states: GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue)
     // init player
     var player = AVPlayer()
     let controller = AVPlayerViewController()
@@ -144,29 +109,21 @@ public class AVPlayerCore: NSObject {
     var timer = Timer()
     var webViewForUserAgent: WKWebView?
     
-    
-    
-    
-    
-    
-    //    public override func viewDidLoad() {
-    //        super.viewDidLoad()
-    //        // Do any additional setup after loading the view.26911E3B-F65B-46F1-AB5F-498510E99467-26-09-2021
-    //    }
-    
+
     //MARK:- Create IDs
-    public class func randomStringForId(_ n: Int) -> String
-    {
-        let  digits = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        
-        return String(Array(0..<n).map{
-            _ in digits.randomElement()!
-        })
-    }
-    
+//    public class func randomStringForId(_ n: Int) -> String
+//    {
+//        let  digits = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+//
+//        return String(Array(0..<n).map{
+//            _ in digits.randomElement()!
+//        })
+//    }
+//
     //MARK:- Id's collection
     func callIds()
     {
+       
         sessionId = checkSessionId()
         checkUniqueId()
         checkPlayBackId()
@@ -178,62 +135,94 @@ public class AVPlayerCore: NSObject {
     
     func createSessionId() -> String
     {
-        let session_Id = AVPlayerCore.randomStringForId(10)
-        
+        let session_Id = UUID().uuidString
+        print("session_Id:-\(session_Id)")//8qBBjceMo8
+     
+//        let date = Date()
+//        let df = DateFormatter()
+//        df.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+//        df.timeZone = NSTimeZone(name: "UTC") as TimeZone?
+//        let dateString = df.string(from: date)
+//        print("date():-\(dateString)")
+//
         UserDefaults.standard.setValue(session_Id, forKey: "user_session")
         UserDefaults.standard.set(Date(), forKey:"user_session_creation_time")
+        UserDefaults.standard.set("", forKey: "backgroundCurrentTime")
+        UserDefaults.standard.set("",  forKey:"foregroundCurrentTime")
         return session_Id
     }
     
-    func checkSessionId() -> String
+   public func checkSessionId() -> String
     {
-        if isSessionId == true
-        {
-            UserDefaults.standard.set(false, forKey: "isSessionId")
-            UserDefaults.standard.removeObject(forKey: "user_session")
-            UserDefaults.standard.removeObject(forKey: "user_session_creation_time")
-        }
-        if let session_id = UserDefaults.standard.string(forKey: "user_session") {
+            if let session_id = UserDefaults.standard.string(forKey: "user_session") {
             print("session_ID:-\(session_id)")
-            if let date = UserDefaults.standard.object(forKey: "user_session_creation_time") as? Date{
+            if let date = UserDefaults.standard.object(forKey: "user_session_creation_time")as? Date {
                 print("date:-\(date)")
-                let difference = Calendar.current.dateComponents([.hour], from: date, to: Date()).hour
-                print("difference:\(String(describing: difference))")
-                if let diff = Calendar.current.dateComponents([.hour], from: date, to: Date()).hour, diff > 8
+                
+                let backgroundCurrentTime = UserDefaults.standard.object(forKey: "backgroundCurrentTime")as? Date
+                let foregroundCurrentTime = UserDefaults.standard.object(forKey: "foregroundCurrentTime")as? Date
+                print("backgroundCurrentTime:-\(String(describing: backgroundCurrentTime))")
+                print("foregroundCurrentTime:-\(String(describing: foregroundCurrentTime))")
+                if backgroundCurrentTime == nil && foregroundCurrentTime == nil{
+                    print("nil")
+                    if let diff = Calendar.current.dateComponents([.minute], from: date, to: Date()).minute, diff > 30
+                    {
+                        print("diff:-\(diff)")
+                        return createSessionId()
+                    }
+                }else if foregroundCurrentTime == nil
                 {
-                    //                    let diff = Calendar.current.dateComponents([.hour], from: date, to: Date()).hour
-                    print("diff:-\(diff)")
-                    
-                    return createSessionId()
+                    print("nil")
+                }
+                else if backgroundCurrentTime == nil
+                {
+                    print("nil")
+                }
+                else
+                {
+                    let diff = Calendar.current.dateComponents([.minute], from: backgroundCurrentTime!, to: foregroundCurrentTime!).minute
+                    print("diff:\(String(describing: diff))")
+                    if  diff! > 30
+                    {
+                        print("diff:-\(String(describing: diff))")
+                        return createSessionId()
+                        
+                    }
+                    else{
+                        if diff! > 30 + diff!
+                        {
+                            print("session_id:-\(session_id)")
+                        }
+                    }
                 }
             }
             return session_id
             
         }
         else{
-            print("create session")
+            //print("create session")
             return createSessionId()
         }
     }
     
-    func createEventId() -> String
+    public func createEventId() -> String
     {
-        let event_id = AVPlayerCore.randomStringForId(10)
+        let event_id = UUID().uuidString
         
         return event_id
     }
     
-    func createNetworkRequestId() -> String
+   public func createNetworkRequestId() -> String
     {
-        let request_id = AVPlayerCore.randomStringForId(10)
+        let request_id = UUID().uuidString
         
         return request_id
     }
     
     
-    func createPlayBackId() -> String
+    public func createPlayBackId() -> String
     {
-        let play_back_id = AVPlayerCore.randomStringForId(10)
+        let play_back_id = UUID().uuidString
         savePlayBackId(playerId: play_back_id)
         return play_back_id
     }
@@ -258,9 +247,9 @@ public class AVPlayerCore: NSObject {
             loadPlayBackId()
         }
     }
-    func createPlayerInstanceId() -> String
+    public func createPlayerInstanceId() -> String
     {
-        let player_instance_id = AVPlayerCore.randomStringForId(10)
+        let player_instance_id = UUID().uuidString
         savePlayerInstanceId(playerInstanceId: player_instance_id)
         return player_instance_id
     }
@@ -287,15 +276,15 @@ public class AVPlayerCore: NSObject {
     }
     
     //MARK:- unique Id
-    func createUniqueId() -> String
+   public func createUniqueId() -> String
     {
         let userId = UIDevice.current.identifierForVendor!.uuidString
-        let index = userId.firstIndex(of: "-") ?? userId.endIndex
-        let beginning = userId[..<index]
-        let unique_id = String(beginning)
+//        let index = userId.firstIndex(of: "-") ?? userId.endIndex
+//        let beginning = userId[..<index]
+//        let unique_id = String(beginning)
         
-        saveUniqueId(uniqueId:unique_id)
-        return unique_id
+        saveUniqueId(uniqueId:userId)
+        return userId
     }
     func saveUniqueId(uniqueId:String)  {
         UserDefaults.standard.setValue(uniqueId, forKey: "user_id")
@@ -323,17 +312,15 @@ public class AVPlayerCore: NSObject {
     
     public func setupPlayer(playerAV:AVPlayer, propertyId:String)
     {
+       
         self.player = playerAV
-        
-        
-        
-        
         
         currentPlayerItem = player.currentItem
         
         init_SDK(propertyId: propertyId)
         
         let video_url: URL? = (player.currentItem?.asset as? AVURLAsset)?.url
+        print("video_url:-\(String(describing: video_url))")
         callEventSetUp(videoURL: video_url!.absoluteString)
         
         
@@ -358,58 +345,81 @@ public class AVPlayerCore: NSObject {
                                                selector: #selector(handleAVPlayerError),name: NSNotification.Name.AVPlayerItemNewErrorLogEntry,
                                                object: nil)
         
-        
-        
-        
-        
+        let notificationCenter = NotificationCenter.default
+            notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+            
+            notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+            
+
     }
+    
+    
     
     public func callEventSetUp(videoURL:String)
     {
-        isPlaybackStarted = false
-        
-        
-        isEventsetup = true
-        
-        eventName = Events.isPlayerSetup.rawValue
-        let prevEvents = ""
-        
-        UserDefaults.standard.setValue(eventName, forKey: "eventName")
-        play_current_time = getPlay_Pause_Time()
-        
-        callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
-        
-        
-        if let url = UserDefaults.standard.string(forKey: "video_url"), url != videoURL{
-            playBackId = AVPlayerCore.randomStringForId(10)
+        playBackId = UUID().uuidString
+    
+        UserDefaults.standard.setValue(playBackId, forKey: "playBackId")
+        if let url = UserDefaults.standard.string(forKey: "video_url"), url != videoURL {
             
-            UserDefaults.standard.setValue(playBackId, forKey: "playBackId")
-            callVideoChange()
+//            callVideoChange()
+            isVideoChange = true
         }
         UserDefaults.standard.setValue(videoURL, forKey: "video_url")
         
+       
+        isPlaybackStarted = true
+     
+        state = gumletTranstion.transitionState(destinationState: GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue)
+        //print("state:-\(state)")
         
+        isEventsetup = true
+        
+      
+    
+        eventName = Events.isPlayerSetup.rawValue
+//        eventCollection.append(eventName)
+        
+        let prevEvents = ""
+        //        //print("previousEvent:-----\(prevEvents)")
+        
+        UserDefaults.standard.setValue(eventName, forKey: "eventName")
+        play_current_time = getPlay_Pause_Time()
+      
+        
+        callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
+        
+        if isVideoChange == true{
+            
+            callVideoChange()
+        }
+        
+       
+     
         
     }
     
     
     public func playerReady()
     {
-        
-        
+        //print("Start to Play")
+       
+      state = gumletTranstion.transitionState(destinationState: GumletPlayerStateMachine.GumletPlayerStateReady.rawValue)
+
         
         isEventsetup = false
         
         eventName = Events.isPlayerReady.rawValue
+//        eventCollection.append(eventName)
         
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
-        
+      
         
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         play_current_time = getPlay_Pause_Time()
-        
+      
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
         
         
@@ -419,6 +429,8 @@ public class AVPlayerCore: NSObject {
                 guard let weakSelf = self else { return }
                 
                 weakSelf.checkForSeekEvent()
+                weakSelf.checkVideoQualityChange()
+                weakSelf.checkMuteAnUnmute()
                 weakSelf.updateLastPlayheadTime()
                 
             })
@@ -429,27 +441,29 @@ public class AVPlayerCore: NSObject {
     public func callPlay()
     {
         
-        if videoMuted == false {
-            
-            if player.isMuted == true{
-                callMute()
-                videoMuted = true
-            }
-        }
+//        if videoMuted == false {
+//
+//            if player.isMuted == true{
+//                callMute()
+//                videoMuted = true
+//            }
+//        }
         
-        
-        
+        //print("play")
+    
+        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+        //print("statePlay:\(state)")
         eventName = Events.isPlay.rawValue
+        
+//        eventCollection.append(eventName)
+        
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         play_current_time = getPlay_Pause_Time()
         UserDefaults.standard.setValue(play_current_time, forKey: "play_current_time")
-        
+     
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
-        
-        
-        
     }
     
     public func callPlaying()
@@ -457,26 +471,35 @@ public class AVPlayerCore: NSObject {
         callSeekEvent()
         
         
+        //print("Playing")
         
+        state = GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue
         eventName = Events.isPlaying.rawValue
         
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+       
+       
+//        eventCollection.append(eventName)
+//        eventArr.append(contentsOf: eventCollection)
+//        print("eventCollection:-\(eventCollection)")
+//        print("eventArr:-\(eventArr)")
         
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+      
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         
         
         play_current_time = getPlay_Pause_Time()
-        
+      
         UserDefaults.standard.setValue(play_current_time, forKey: "seekedTime")
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
+      
         
         
-        
-        if isPlaybackStarted == false
+        if isPlaybackStarted == true
         {
             callPlaybackStarted()
-            isPlaybackStarted = true
+            isPlaybackStarted = false
         }
         
         
@@ -494,29 +517,32 @@ public class AVPlayerCore: NSObject {
         timer.invalidate()
         timer = Timer()
         
-        if videoMuted == false {
-            
-            if player.isMuted == true{
-                callMute()
-                videoMuted = true
-            }
-        }
-        else if player.isMuted == false
-        {
-            if videoUnMuted == true
-            {
-                callUnmute()
-                videoUnMuted = false
-            }
-            
-        }
+//        if videoMuted == false {
+//
+//            if player.isMuted == true{
+//                callMute()
+//                videoMuted = true
+//            }
+//        }
+//        else if player.isMuted == false
+//        {
+//            if videoUnMuted == true
+//            {
+//                callUnmute()
+//                videoUnMuted = false
+//            }
+//
+//        }
         
+     
         
-        
-        
+        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
         eventName = Events.isPaused.rawValue
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
         
+//        eventCollection.append(eventName)
+        
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+      
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
@@ -524,52 +550,41 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+   
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
-        
-        
-        
-        
-        
-        
-        
     }
     
     func callPlaybackStarted()
     {
-        
-        
         eventName = Events.isPlaybackStarted.rawValue
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
         
-        
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
-        
-        
         
         play_current_time = getPlay_Pause_Time()
         UserDefaults.standard.setValue(play_current_time, forKey: "play_current_time")
-        
+       
         callEventsAPI(eventTime: 0.0, previousEvents:prevEvents)
-        
-        
-        
-        
     }
-    
+
     
     public func callBufferingStart()
     {
         
         timer.invalidate()
+        //print("Buffering Start")
+        
+        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
         
         eventName = Events.isBufferingStart.rawValue
+        eventCollection.append(eventName)
+        
         var prevEvents :String? = ""
         
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+           
         }
         else{
             
@@ -588,18 +603,15 @@ public class AVPlayerCore: NSObject {
     
     public func callBufferingEnd()
     {
-        
-        
-        
-        
-        
+        //print("Buffering End")
         eventName = Events.isBufferingEnd.rawValue
-        var prevEvents :String? = ""
         
+        var prevEvents :String? = ""
+       
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+           
         }
         else{
             
@@ -608,63 +620,54 @@ public class AVPlayerCore: NSObject {
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
-        
-        
-        
         play_current_time = getPlay_Pause_Time()
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
-        
-        
-        
-        
     }
     
     func callMute()
     {
         videoUnMuted = true
         
-        
+     
         eventName = Events.isMute.rawValue
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+
         
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+       
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         
         play_current_time = getPlay_Pause_Time()
-        
+       
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
-        
-        
-        
     }
     
     func callUnmute()
     {
+        //print("callUnMute")
         
-        
-        
+//        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateUnMute.rawValue)
         eventName = Events.isUnMute.rawValue
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+
         
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+     
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         
         play_current_time = getPlay_Pause_Time()
-        
+      
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
-        
-        
     }
     
     func callFullScreenStart()
     {
-        
-        
+       
         eventName = Events.isFullScreenStart.rawValue
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
-        
+    
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
@@ -672,7 +675,7 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+    
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
         
         
@@ -681,9 +684,10 @@ public class AVPlayerCore: NSObject {
     func callFullScreenEnd()
     {
         timer.invalidate()
-        
+        //print("callFullScreenEnd")
         eventName = Events.isFullScreenEnd.rawValue
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+        //print("previousEvent:-----\(prevEvents)")
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
@@ -691,7 +695,7 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+       
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
         
         
@@ -700,13 +704,15 @@ public class AVPlayerCore: NSObject {
     
     func callDeviceOrientation()
     {
-        
+       
         if (isOrientationChange == false)
         {
             isOrientationChange = true
             eventName = Events.isDeviceOrientationChange.rawValue
-            var prevEvents :String? = ""
+//            eventCollection.append(eventName)
             
+            var prevEvents :String? = ""
+        
             if prevEvents == ""{
                 prevEvents = ""
             }
@@ -715,6 +721,8 @@ public class AVPlayerCore: NSObject {
                 
                 
                 prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
+                //print("previousEvent:-----\(String(describing: prevEvents))")
+                
                 
             }
             
@@ -724,13 +732,15 @@ public class AVPlayerCore: NSObject {
             
             
             play_current_time = getPlay_Pause_Time()
-            
+           
             callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
         }
         else if(isOrientationChange == true)
         {
             isOrientationChange = false
             eventName = Events.isDeviceOrientationChange.rawValue
+
+            
             var prevEvents :String? = ""
             
             if prevEvents != nil{
@@ -740,7 +750,7 @@ public class AVPlayerCore: NSObject {
             else{
                 
                 prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-                
+              
                 
             }
             
@@ -750,7 +760,7 @@ public class AVPlayerCore: NSObject {
             
             
             play_current_time = getPlay_Pause_Time()
-            
+          
             callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
         }
         
@@ -760,13 +770,14 @@ public class AVPlayerCore: NSObject {
     func callScreenCastStart()
     {
         timer.invalidate()
-        eventName = Events.isScreenCastStart.rawValue
+        //print("callFullScreenStart")
+//        eventName = Events.isScreenCastStart.rawValue
         var prevEvents :String? = ""
         
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+            //print("previousEvent:-----\(String(describing: prevEvents))")
         }
         else{
             
@@ -777,7 +788,7 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+     
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
         
     }
@@ -785,14 +796,14 @@ public class AVPlayerCore: NSObject {
     func callScreenCastEnd()
     {
         timer.invalidate()
-        
-        eventName = Events.isScreenCastEnd.rawValue
+        //print("callFullScreenStart")
+//        eventName = Events.isScreenCastEnd.rawValue
         var prevEvents :String? = ""
         
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+            //print("previousEvent:-----\(String(describing: prevEvents))")
         }
         else{
             
@@ -804,29 +815,31 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+       
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
     }
     
     public func callVideoChange()
     {
         timer.invalidate()
+        //print("callVideoChange")
         
-        
-        
+        isVideoChange = false
         
         eventName = Events.isVideochange.rawValue
+//        eventCollection.append(eventName)
+        
         var prevEvents :String? = ""
         
         if prevEvents != nil{
-            
+
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+            //print("previousEvent:-----\(String(describing: prevEvents))")
         }
         else{
             
             prevEvents = ""
-        }
+      }
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
@@ -834,60 +847,67 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+      
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
         
         
-        
+      
         
     }
     
     
     func callVideoQualityChange()
     {
-        
+     
         
         isQualitychange = true
+        isVideoQualityChange = true
+        //print("callVideoQualityChange")
         eventName = Events.isQualityChange.rawValue
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+
         
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+      
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         
         
         play_current_time = getPlay_Pause_Time()
-        
+       
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
     }
     
     func callSeekEvent()
     {
+        //print("seek:\(isSeeking)")
         if isSeeking == true
         {
-            
-            
-            callSeekedEvent()
+            //print("seek end")
+//            state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
+//            if state == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue
+//            {
+                callSeekedEvent()
+//            }
             isSeeking = false
-            
         }
-        
-        
-        
     }
     
     func callSeekedEvent()
     {
-        
-        
+      
+        //print("is seeked")
+//        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
         eventName = Events.isSeek.rawValue
+//        eventCollection.append(eventName)
+        
         var prevEvents :String? = ""
         let seekTime = getDate()
         UserDefaults.standard.setValue(seekTime, forKey: "seekTimeEnd")
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+            //print("previousEvent:-----\(String(describing: prevEvents))")
         }
         else{
             
@@ -897,14 +917,14 @@ public class AVPlayerCore: NSObject {
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         let seekStartTime = UserDefaults.standard.value(forKey: "seekVideoStartTime")
-        
+       
         
         
         play_current_time = getPlay_Pause_Time()
         
         let seekedTime = play_current_time//total_time as! Double + 15.0
         
-        
+      
         callSeekEventsAPI(eventTime: play_current_time, previousEvents: prevEvents!, seekingTime: seekStartTime as! Double, seekedTime:seekedTime)
     }
     
@@ -913,7 +933,7 @@ public class AVPlayerCore: NSObject {
     func callError() {
         
         
-        
+        state =  gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
         if (player.error != nil)
         {
             let errCode = player.error! as NSError
@@ -936,7 +956,7 @@ public class AVPlayerCore: NSObject {
         if prevEvents != nil{
             
             prevEvents = (UserDefaults.standard.value(forKey: "eventName") as! String)
-            
+            //print("previousEvent:-----\(String(describing: prevEvents))")
         }
         else{
             
@@ -948,14 +968,11 @@ public class AVPlayerCore: NSObject {
         
         isBuffer = true
         
-        play_current_time = getPlay_Pause_Time()
-        
+        play_current_time = getPlay_Pause_Time()//Double(currentTime)
+        //        //print("play_current_time:-\(play_current_time)")
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents!)
         
     }
-    
-    
-    
     
     
     //MARK:-- update playback Event Timer
@@ -970,12 +987,13 @@ public class AVPlayerCore: NSObject {
     @objc func updateTimer()
     {
         
-        
+        //print("updatePlaybackEvent")
+        //        getBitrate()
         
         eventName = Events.isUpdatePlayback.rawValue
         
         let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
-        
+        //print("previousEvent:-----\(prevEvents)")
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
@@ -983,59 +1001,72 @@ public class AVPlayerCore: NSObject {
         
         
         play_current_time = getPlay_Pause_Time()
-        
+        //        //print("play_current_time:-\(play_current_time)")
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
         
-        if videoMuted == false {
-            
-            if player.isMuted == true{
-                callMute()
-                videoMuted = true
-            }
-        }
-        else if player.isMuted == false
-        {
-            if videoUnMuted == true
-            {
-                callUnmute()
-                videoUnMuted = false
-            }
-            
-        }
+//        if videoMuted == false {
+//
+//            if player.isMuted == true{
+//                callMute()
+//                videoMuted = true
+//            }
+//        }
+//        else if player.isMuted == false
+//        {
+//            if videoUnMuted == true
+//            {
+//                callUnmute()
+//                videoUnMuted = false
+//            }
+//
+//        }
     }
     
+    
+    //    @objc func updatePlaybackHeadTimeForEnd()
+    //    {
+    //        play_current_time = getPlay_Pause_Time()
+    //        UserDefaults.standard.setValue(play_current_time, forKey: "playbackUpdateLastTime")
+    //    }
+    
+    @objc func appMovedToBackground() {
+       print("app enters background")
+//        let currentTime = getDate()
+        UserDefaults.standard.setValue(Date(), forKey: "backgroundCurrentTime")
+   }
+
+   @objc func appCameToForeground() {
+       print("app enters foreground")
+    
+//    let currentTime = getDate()
+    UserDefaults.standard.setValue(Date(), forKey: "foregroundCurrentTime")
+   }
     
     
     @objc func playerDidFinishPlaying(){
-        
+        //print("Video Finished")
         
         isplaybackFinish = true
-        
-        
+        //isViewEnd = false
+        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue)
         eventName = Events.isEnd.rawValue
-        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+        eventCollection.append(eventName)
         
+        let prevEvents = UserDefaults.standard.value(forKey: "eventName") as! String
+        //print("previousEvent:-----\(prevEvents)")
         
         UserDefaults.standard.setValue(eventName, forKey: "eventName")
         
         play_current_time = getPlay_Pause_Time()
-        
+        //   play_current_time = UserDefaults.standard.value(forKey: "playbackUpdateLastTime") as! Double
+        //        //print("play_current_time:-\(play_current_time)")
+        //        callEventsEndAPI(eventTime: play_current_time, previousEvents:prevEvents)
         callEventsAPI(eventTime: play_current_time, previousEvents:prevEvents)
         
         
     }
     
-    //Forcing playback again.
-    @objc func playerStalled(note: NSNotification) {
-        
-        let playerItem = note.object as! AVPlayerItem
-        if let player = playerItem.value(forKey: "player") as? AVPlayer{
-            player.play()
-        }
-        
-        
-        
-    }
+   
     
     
     
@@ -1043,13 +1074,13 @@ public class AVPlayerCore: NSObject {
     @objc func handleAVPlayerError(notification: Notification) {
         
         let isNotificationRelevant :Bool = checkIfNotificationIsRelevant(notif: notification as NSNotification)
-        
+        //        //print("isNotificationRelevantError:\(isNotificationRelevant)")
         if (isNotificationRelevant) {
             
-            
+            //                //print("isNotificationRelevant inside:\(isNotificationRelevant)")
             let playerItem = notification.object as? AVPlayerItem
-            let log:AVPlayerItemErrorLog? = playerItem!.errorLog()
-            
+            let log:AVPlayerItemErrorLog? = playerItem!.errorLog() //accessLog];
+            //                [self handleRenditionChangeInAccessLog:accessLog];
             
             if (log != nil && log!.events.count > 0)
             {
@@ -1057,16 +1088,18 @@ public class AVPlayerCore: NSObject {
                 let errorEvent : AVPlayerItemErrorLogEvent? = log!.events[log!.events.count - 1]
                 
                 
-                let request_start = getDate()
-                let request_response_start = getDate()
-                
-                let request_response_end  = getDate()
+                let request_start = Int(Date().timeIntervalSince1970)//getDate()
+                let request_response_start = Int(Date().timeIntervalSince1970)
+                //            //print("requestResponseStart:\(request_response_start)")
+                let request_response_end = Int(Date().timeIntervalSince1970)
                 let requestError = errorEvent!.errorDomain;
                 let request_type = "event_requestfailed";
                 let requestUrl = (errorEvent?.uri)!;
                 let requestHostName = getHostName(videoUrl: requestUrl)
                 let requestErrorCode = errorEvent!.errorStatusCode
                 guard let requestErrorText = errorEvent?.errorComment else { return };
+                //                    [self dispatchBandwidthMetric:loadData withType:MUXSDKPlaybackEventRequestBandwidthEventErrorType];
+                
                 
                 callNetworkAPI(requestStart:request_start , requestrResponseStart: request_response_start, requestResponseEnd: request_response_end, requestType: request_type, requestHostName: requestHostName, requestBytesLoaded: 0, requestResponseHeaders: "", requestMediaDuration_millis: 0, errorCode: requestErrorCode, error: requestError, errorText: requestErrorText)
             }
@@ -1085,21 +1118,23 @@ public class AVPlayerCore: NSObject {
               let lastEvent = playerItem.accessLog()?.events.last else {
             return
         }
-        if indicatedBitrate != Float(lastEvent.indicatedBitrate){
+        if indicatedBitrate != Float(lastEvent.indicatedAverageBitrate){
             
             
-            indicatedBitrate = Float(lastEvent.indicatedBitrate)
-            callVideoQualityChange()
+            indicatedBitrate = Float(lastEvent.indicatedAverageBitrate)
+            print("indicatedBitrate:--\(indicatedBitrate)")
+//            callVideoQualityChange()
         }
+        //        //print("indicatedBitrate:--\(indicatedBitrate)")
         
         let isNotificationRelevant :Bool = checkIfNotificationIsRelevant(notif: notification as NSNotification)
-        
+        //        //print("isNotificationRelevant:\(isNotificationRelevant)")
         if (isNotificationRelevant) {
             
-            
+            //                //print("isNotificationRelevant inside:\(isNotificationRelevant)")
             let playerItem = notification.object as? AVPlayerItem
-            let accessLog = playerItem!.accessLog()
-            
+            let accessLog = playerItem!.accessLog() //accessLog];
+            //                [self handleRenditionChangeInAccessLog:accessLog];
             calculateBandwidthMetricFromAccessLog(log:accessLog!)
             
             
@@ -1115,7 +1150,10 @@ public class AVPlayerCore: NSObject {
     
     func checkIfNotificationIsRelevant(notif:NSNotification) -> Bool{
         let notificationItem   = notif.object as! AVPlayerItem
+        //        //print("notificationItem:-\(notificationItem)")
         
+        
+        //        //print("currentPlayerItem:\(String(describing: currentPlayerItem))")
         return notificationItem == currentPlayerItem
     }
     
@@ -1123,7 +1161,7 @@ public class AVPlayerCore: NSObject {
     @objc func receiveAirPlayNotification(note: NSNotification)
     {
         //Do whatever you want here, or call another function
-        
+        //    //print("Received Notification - \(note)")
         callScreenCastStart()
         
     }
@@ -1138,17 +1176,25 @@ public class AVPlayerCore: NSObject {
             if keyPath == "status" {
                 if player.status == .readyToPlay
                 {
+                     state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateReady.rawValue)
+                     if state == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue
+                    {
                     playerReady()
+                    }
                 }
                 else if player.status == .failed
                 {
-                    
+                    //print("error")
+                    state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+                    if state == GumletPlayerStateMachine.GumletPlayerStateError.rawValue
+                    {
                     callError()
+                    }
                 }
                 else if player.status == .unknown
                 {
-                    callError()
                     
+                    //print("unknown")
                 }
             }
             
@@ -1157,15 +1203,26 @@ public class AVPlayerCore: NSObject {
                 
                 if player.rate == 1.0
                 {
-                    state = GumletPlayerState.GumletPlayerStatePlay.rawValue
-                    callPlay()
+                    state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+                    if state == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue
+                    {
+                        callPlay()
+                    }
+                    
                 }
                 else if player.rate == 0.0
                 {
-                    state = GumletPlayerState.GumletPlayerStatePaused.rawValue
-                    callPause()
+                    state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+                    if state == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue
+                    {
+                        callPause()
+                    }
+                    
                 }
-                
+                else
+                {
+                    //print("error")
+                }
             }
             else if keyPath == "timeControlStatus"
             {
@@ -1178,21 +1235,31 @@ public class AVPlayerCore: NSObject {
                         isBuffer = false
                         
                     }
-                    callPlaying()
+                    state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+                    if state == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue
+                    {
+                        callPlaying()
+                    }
+                 
                     
                     
                 }
                 else if player.timeControlStatus == .paused
                 {
-                    print("timeControl paused")
+                    //print("timeControl paused")
                 }
                 else if player.timeControlStatus == .waitingToPlayAtSpecifiedRate
                 {
-                    
+                    //print("the playback buffer becomes empty")
                     //                bufferState()
                     if isBuffer == false{
                         
-                        callBufferingStart()
+                        state = gumletTranstion.transitionState(destinationState:GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+                        if state == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue
+                        {
+                            callBufferingStart()
+                        }
+                       
                         isBuffer = true
                     }
                     
@@ -1206,16 +1273,21 @@ public class AVPlayerCore: NSObject {
     
     //MARK:- init SDK
     
-    public func init_SDK(propertyId:String)
+    public func init_SDK(propertyId:String)//(_ playerAV:AVPlayer, propertyId:String)
     {
-        isSessionId = UserDefaults.standard.bool(forKey: "isSessionId")
+//        UserDefaults.standard.removeObject(forKey: "user_session")
+//        let user_session = UserDefaults.standard.value(forKey: "user_session")
+//        //print("user_session:\(user_session)")
+//        isSessionId = UserDefaults.standard.bool(forKey: "isSessionId")
         callIds()
+      
         
         let url: URL? = (player.currentItem?.asset as? AVURLAsset)?.url
         let video_url = url!.absoluteString
+        //print("videoUrl:-\(video_url)")
         
-        
-        let localCurrentTime = getDate()
+//        let localCurrentTime = getDate()
+         currentTimeEpoch = (((Date().timeIntervalSince1970) * 1000)/1000).roundToDecimal(3)
         let screenBounds = getScreenBounds()
         screenWidth = Int(Float(screenBounds.size.width))
         screenHeight = Int(Float(screenBounds.size.height))
@@ -1235,7 +1307,8 @@ public class AVPlayerCore: NSObject {
         var device_is_touchscreen :Bool = true
         let operating_system_version = UIDevice.current.systemVersion
         
-        
+        //            let modelID = UIDevice().type
+        //            //print("modelId:-\(modelID)")
         let device_name = UIDevice.current.name
         let operating_system = UIDevice.current.systemName
         
@@ -1276,9 +1349,9 @@ public class AVPlayerCore: NSObject {
         meta_device_Arch = getArchitecture()
         meta_CDN = getHostName(videoUrl: video_url)
         videoSourceUrl = video_url
-        
+        //            //print("videvideoSourceUrl:-\(videoSourceUrl)")
         UserDefaults.standard.setValue(propertyId, forKey: "EnvironmentKey")
-        UserDefaults.standard.setValue("", forKey: "video_url")
+//        UserDefaults.standard.setValue("", forKey: "video_url")
         
         let userData = GumletInsightsUserData()
         let userName = userData.userName
@@ -1293,33 +1366,34 @@ public class AVPlayerCore: NSObject {
         
         
         //call API
-        videAnaManager.callSessionAPI(sessionId: sessionId, userId: uniqueId,  metaDeviceArch: meta_device_Arch, userName: userName, userEmail: userEmail, userCity: userCity,userPhone:userPhone,userAddLineOne:userAddLineOne,userAddLineTwo:userAddLineTwo,userState:userState,userZipCode:userZipCode,userCountry:userCountry, gumletEnvironmentKey: propertyId, version: operating_system_version, platform: operating_system, deviceCategory: device_category, deviceManufacturer: device_manufacturer, deviceName: device_name, deviceWidth:screenWidth , deviceDisplayPPI: device_display_ppi, deviceHeight: screenHeight, deviceIsTouchable: device_is_touchscreen,localCurrentTime:localCurrentTime,orientation: deviceOrientation, customUserId: "")
+        videAnaManager.callSessionAPI(sessionId: sessionId, userId: uniqueId,  metaDeviceArch: meta_device_Arch, userName: userName, userEmail: userEmail, userCity: userCity,userPhone:userPhone,userAddLineOne:userAddLineOne,userAddLineTwo:userAddLineTwo,userState:userState,userZipCode:userZipCode,userCountry:userCountry, gumletEnvironmentKey: propertyId, version: operating_system_version, platform: operating_system, deviceCategory: device_category, deviceManufacturer: device_manufacturer, deviceName: device_name, deviceWidth:screenWidth , deviceDisplayPPI: device_display_ppi, deviceHeight: screenHeight, deviceIsTouchable: device_is_touchscreen,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation, customUserId: "")
         
         
-        playerInstanceId = AVPlayerCore.randomStringForId(10)
+        playerInstanceId = UUID().uuidString //RCt7MfWyaM
+        //print("playerInstaceId:-\(playerInstanceId)")
         UserDefaults.standard.setValue(playerInstanceId, forKey: "playerInstanceId")
         callPlayerData(propertyId, self.player, videoUrl: video_url)
-        
+        // callPlayerData( gumletEnvironmentKey: gumletEnvironmentKey, playerName:playerName,pageType: page_type,customUserId:customUserId)
         
     }
     
-    //MARK:- Player Data 
+    //MARK:- Player Data
     func callPlayerData(_ gumletEnvironmentKey:String,_ playerAV:AVPlayer, videoUrl:String)
-    
+    //(playerIntegrationVersion:String, gumletEnvironmentKey:String, playerName:String, pageType:String, customUserId:String)
     {
         
         callIds()
         
         playerInstanceId = UserDefaults.standard.value(forKey: "playerInstanceId") as! String
-        
+        //print("playerInstanceId:-\(playerInstanceId)")
         
         let screenBounds = getScreenBounds()
         screenWidth = Int(screenBounds.size.width)
         screenHeight = Int(screenBounds.size.height)
         
-        
+        //        prevDeviceOrientation = UserDefaults.standard.value(forKey:"deviceOrientation") as! String
         let language = NSLocale.preferredLanguages.first
-        
+        //] firstObject];
         if ((language) != nil) {
             playerLanguage  = language!
         }
@@ -1328,27 +1402,39 @@ public class AVPlayerCore: NSObject {
             playerLanguage  = "English"
         }
         
-        deviceOrientation = "Portrait"
+        deviceOrientation = "Portrait"//rotated()
         UserDefaults.standard.setValue(deviceOrientation, forKey: "deviceOrientation")
         
         
+        //        getBitrate()
+        //        //print("player.isMuted:---\(player.isMuted)")
+        
+        //        let size = player.currentItem?.preferredMaximumResolution
+        //        //print("size:--\(String(describing: size))")
         
         
-        let videoURL = NSURL(string:videoSourceUrl)
-        let asset = AVAsset(url:videoURL! as URL)
+        //        playerLanguage  = "English"
         
-        for characteristic in asset.availableMediaCharacteristicsWithMediaSelectionOptions {
-            // Retrieve the AVMediaSelectionGroup for the specified characteristic.
-            if let group = asset.mediaSelectionGroup(forMediaCharacteristic: characteristic) {
-                // Print its options.
-                for option in group.options {
-                    
-                    
-                    _ = option.displayName
-                    
-                }
-            }
-        }
+        
+//        let videoURL = NSURL(string:videoSourceUrl)
+//        let asset = AVAsset(url:videoURL! as URL)
+//
+//        for characteristic in asset.availableMediaCharacteristicsWithMediaSelectionOptions {
+//            // Retrieve the AVMediaSelectionGroup for the specified characteristic.
+//            if let group = asset.mediaSelectionGroup(forMediaCharacteristic: characteristic) {
+//                // //print its options.
+//                for option in group.options {
+//
+//                    //                    let player_language
+//                    let  playerLanguage = option.displayName
+//                    //print("playerLanguage:-\(playerLanguage)")
+//                    //print("option:-\(option)")
+//                    //                    UserDefaults.standard.setValue(player_language, forKey: "playerLanguage")
+//
+//
+//                }
+//            }
+//        }
         
         let isPreload = "true"
         
@@ -1360,18 +1446,19 @@ public class AVPlayerCore: NSObject {
         let PlayerSoftwareVersion = "AVKit"
         
         
-        let localCurrentTime = getDate()
-        
+//        let localCurrentTime = getDate()
+      
+         currentTimeEpoch = (((Date().timeIntervalSince1970) * 1000)/1000).roundToDecimal(3)
         
         let playerData = GumletInsightsCustomPlayerData()
         let pageType = playerData.gumletPageType
         let playerIntegrationVersion = playerData.GumletPlayerIntegrationVersion
         let playerName = playerData.GumletPlayerName
         
-        videAnaManager.callPlayerAPI(sessionId: sessionId, userId: uniqueId, playerInstaceId: playerInstanceId, playerHeight: screenHeight, playerWidth: screenWidth, pageType: pageType, pageUrl: bundleId, playerSoftware: playerSoftware, playerLanguageCode: playerLanguage, playerName: playerName, playerIntegrationVersion: playerIntegrationVersion, playerSoftwareVersion: PlayerSoftwareVersion, playerPreload: isPreload, gumletEnvironmentKey: gumletEnvironmentKey,localCurrentTime:localCurrentTime,orientation: deviceOrientation,customUserId:"")
+        videAnaManager.callPlayerAPI(sessionId: sessionId, userId: uniqueId, playerInstaceId: playerInstanceId, playerHeight: screenHeight, playerWidth: screenWidth, pageType: pageType, pageUrl: bundleId, playerSoftware: playerSoftware, playerLanguageCode: playerLanguage, playerName: playerName, playerIntegrationVersion: playerIntegrationVersion, playerSoftwareVersion: PlayerSoftwareVersion, playerPreload: isPreload, gumletEnvironmentKey: gumletEnvironmentKey,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,customUserId:"")
         
         
-        
+        //        setupPlayer(playerAV: self.player, video_url: videoUrl)
     }
     
     
@@ -1379,14 +1466,24 @@ public class AVPlayerCore: NSObject {
     func callEventsAPI(eventTime : Double, previousEvents:String)
     {
         callIds()
+        //        getBitrate()
         
+        
+        
+        //        let lastEvent = currentPlayerItem?.accessLog()?.events.lastObject
+        //        let advertisedBitrate = lastEvent.indicatedBitrate;
         playerInstanceId = UserDefaults.standard.value(forKey: "playerInstanceId") as! String
-        
+        //print("playerInstanceId:-\(playerInstanceId)")
         
         playBackId = UserDefaults.standard.value(forKey: "playBackId") as! String
-        
+        //print("playerId:\(playBackId)")
         
         let localCurrentTime = getDate()
+         currentTimeEpoch = (((Date().timeIntervalSince1970) * 1000)/1000).roundToDecimal(3)
+        //Int(Date().timeIntervalSince1970)
+        print("currentTimeEpoch:-\(currentTimeEpoch)")
+        
+
         
         UserDefaults.standard.setValue(localCurrentTime, forKey: "localCurrentTime")
         
@@ -1396,6 +1493,9 @@ public class AVPlayerCore: NSObject {
         
         player_width = Float(playerBounds.size.width)
         player_height  = Float(playerBounds.size.height)
+        //        //print("player_width:-\(player_width)")
+        //
+        //        //print("video_width:-\(videoWidth)")
         
         
         
@@ -1408,31 +1508,39 @@ public class AVPlayerCore: NSObject {
             
             videoWidth  = Float(abs(size!.width)).rounded()
             videoHeight = Float(abs(size!.height)).rounded()
+
+
+            UserDefaults.standard.setValue(videoWidth, forKey: "videoWidth")
+            UserDefaults.standard.setValue(videoHeight, forKey: "videoHeight")
+            
         }
         else
         {
             callError()
         }
         
-        
+        //print("videoWidth\(videoWidth)")
+        //print("videoHeight\(videoHeight)")
         
         
         
         
         if  ((Int(player_width) == screenWidth && Int(player_height) == screenHeight) ||
-                (Int(player_width) == screenHeight && Int(player_height) == screenWidth))
+                (Int(player_width) == screenWidth && Int(player_height) == screenHeight))
         {
-            
+            //            if isFullScreen == false
+            //            {
+            //               callFullScreenStart()
             isFullScreen = true
-            
+            //                //print("isfullSCreen true")
         }
         else
-        
+        //        if isFullScreen == true
         {
             
-            
+            //                callFullScreenEnd()
             isFullScreen = false
-            
+            //                //print("isFullScreen false")
         }
         
         
@@ -1445,7 +1553,7 @@ public class AVPlayerCore: NSObject {
         
         
         videoSourceUrl = UserDefaults.standard.value(forKey: "video_url") as! String
-        
+        //        //print("videoSourceUrlEveNT:--\(videoSourceUrl)")
         videoSourceType = getVideoSourceType(VideoUrl:videoSourceUrl)
         
         
@@ -1458,29 +1566,36 @@ public class AVPlayerCore: NSObject {
         videoTotalTime = getTotalVideoDuration()
         let gumlet_Environment_Key = UserDefaults.standard.value(forKey: "EnvironmentKey")
         
+        //        //print("player.isMuted:---\(player.isMuted)")
         
+        
+        //        //print("playerWidth:\(player_width)")
+        //        //print("videoWidth:\(videoWidth)")
         
         let upscale = upScale(playerWidth: player_width, videoWidth: videoWidth)
         let downscale = downScale(playerWidth: player_width, videoWidth: videoWidth)
         
-//        let videoData = GumletInsightsCustomVideoData()
-//        _ = videoData.customVideotitle
-        //        _ = videoData.customVideoId
-        //        _ = videoData.customVideoProducer
-//
+        //        //print("upscale:-\(upscale)")
+        
+        //        let seekingTime = UserDefaults.standard.value(forKey:"seekingTime")
+        //        //print("seekingTime:\(seekingTime)")
+        //        let seekedTime = UserDefaults.standard.value(forKey: "seekedTime")
+        //        //print("seekedTime:\(seekedTime)")
+        //        //print("seekingtime:-\(String(describing: seekingTime))")
+        
         if isEventsetup == true
         {
             UserDefaults.standard.setValue(localCurrentTime, forKey: "localCurrentTimePrevEvent")
             let previousEventTime = getLastEventsTime()
             
-            videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: 0.0, videoUpscale: 0.0, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted:player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"NO",errorMsg:"",errorTitle:"",errorCode:0)
+            videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: 0.0, videoUpscale: 0.0, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted:player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"NO",errorMsg:"",errorTitle:"",errorCode:0)
         }
         else if isEventsetup == false
         {
             let previousEventTime = getLastEventsTime()
             
             
-            if isPlaybackStarted == true
+            if isPlaybackStarted == false
             {
                 
                 if isQualitychange == true
@@ -1490,33 +1605,27 @@ public class AVPlayerCore: NSObject {
                     
                     if isOrientationChange == true || isOrientationChange == false{
                         
-                        videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"true",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
+                        videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"true",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
                     }
                     else{
-                        videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"true",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
+                        videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"true",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
                     }
                 }
                 else if isQualitychange == false
                 {
-                    videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"false",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
+                    videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"false",errorMsg: errorMessage,errorTitle:errorTitle,errorCode:errorCode)
                 }
             }
             
-            else if isPlaybackStarted == false
+            else if isPlaybackStarted == true
             {
                 //need to add quality change flag , but put flag after sometime
-                videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: 0.0, videoUpscale: 0.0, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"NO",errorMsg:errorMessage,errorTitle:errorTitle,errorCode:errorCode)
+                videAnaManager.callEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName, startPlayTimeInMS:event_current_time, videoDownScale: 0.0, videoUpscale: 0.0, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"NO",errorMsg:errorMessage,errorTitle:errorTitle,errorCode:errorCode)
             }
             
         }
         
     }
-    
-    
-    
-    
-    
-    
     
     //MARK:- seek event API
     func callSeekEventsAPI(eventTime : Double, previousEvents:String, seekingTime:Double,seekedTime:Double)
@@ -1528,6 +1637,7 @@ public class AVPlayerCore: NSObject {
         playBackId = UserDefaults.standard.value(forKey: "playBackId") as! String
         
         let localCurrentTime = getDate()
+        currentTimeEpoch = (((Date().timeIntervalSince1970) * 1000)/1000).roundToDecimal(3)
         
         UserDefaults.standard.setValue(localCurrentTime, forKey: "localCurrentTime")
         
@@ -1537,7 +1647,9 @@ public class AVPlayerCore: NSObject {
         
         player_width = Float(playerBounds.size.width)
         player_height  = Float(playerBounds.size.height)
-        
+        //        //print("player_width:-\(player_width)")
+        //
+        //        //print("video_width:-\(videoWidth)")
         
         
         
@@ -1555,22 +1667,26 @@ public class AVPlayerCore: NSObject {
             callError()
         }
         
+        //print("videoWidth\(videoWidth)")
+        //print("videoHeight\(videoHeight)")
         
         
         if  ((Int(player_width) == screenWidth && Int(player_height) == screenHeight) ||
                 (Int(player_width) == screenHeight && Int(player_height) == screenWidth))
         {
-            
+            //            if isFullScreen == false
+            //            {
+            //               callFullScreenStart()
             isFullScreen = true
-            
+            //                //print("isfullSCreen true")
         }
         else
-        
+        //        if isFullScreen == true
         {
             
-            
+            //                callFullScreenEnd()
             isFullScreen = false
-            
+            //                //print("isFullScreen false")
         }
         
         
@@ -1587,29 +1703,31 @@ public class AVPlayerCore: NSObject {
         videoTotalTime = getTotalVideoDuration()
         let gumlet_Environment_Key = UserDefaults.standard.value(forKey: "EnvironmentKey")
         
-        
+        //        //print("player.isMuted:---\(player.isMuted)")
         
         let upscale = upScale(playerWidth: player_width, videoWidth: videoWidth)
         let downscale = downScale(playerWidth: player_width, videoWidth: videoWidth)
         
         
         UserDefaults.standard.setValue(localCurrentTime, forKey: "localCurrentTimePrevEvent")
-        let previousEventTime = getSeekLatency()
-        
+        //let previousEventTime = getSeekLatency()
+        let previousEventTime = getLastEventsTime()
+        //        if isPlaybackStarted == true
+        //        {
         if isOrientationChange == true || isOrientationChange == false
         {
             
-            videAnaManager.callSeekEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName,seekingtime: seekingTime, seekedTime: seekedTime, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"NO")
+            videAnaManager.callSeekEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName,seekingtime: seekingTime, seekedTime: seekedTime, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:indicatedBitrate, playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:prevDeviceOrientation,fullscreen:isFullScreen,quality:"NO")
         }
         else{
-            videAnaManager.callSeekEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName,seekingtime: seekingTime, seekedTime: seekedTime, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:Float(indicatedBitrate), playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:localCurrentTime,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"NO")
+            videAnaManager.callSeekEventAPI(eventId: eventId, sessionId: sessionId, userId:uniqueId, playbackId: playBackId, playerInstaceId: playerInstanceId, event:eventName,seekingtime: seekingTime, seekedTime: seekedTime, startPlayTimeInMS:event_current_time, videoDownScale: downscale, videoUpscale: upscale, bitrateMbps:Float(indicatedBitrate), playerRemotePlayed: "true", videoSourceDomain: meta_CDN, videoTotalDuration: videoTotalTime, videoWidthPixel:videoWidth, videoHeightPixel:videoHeight, videoSourceUrl: videoSourceUrl, videoSourceHostName: meta_CDN, videoSourceType: videoSourceType, muted: player.isMuted, previousEvent: previousEvents, previousEventTime: previousEventTime, gumletEnvironmentKey: gumlet_Environment_Key as! String,localCurrentTime:currentTimeEpoch,orientation: deviceOrientation,orientation_from:"",fullscreen:isFullScreen,quality:"NO")
         }
     }
     
     
     
     //MARK:- Network API
-    func callNetworkAPI(requestStart:String, requestrResponseStart: String, requestResponseEnd: String, requestType: String, requestHostName: String, requestBytesLoaded: Int64, requestResponseHeaders: String, requestMediaDuration_millis: Int,  errorCode: Int, error: String, errorText: String)
+    func callNetworkAPI(requestStart:Int, requestrResponseStart: Int, requestResponseEnd: Int, requestType: String, requestHostName: String, requestBytesLoaded: Int64, requestResponseHeaders: String, requestMediaDuration_millis: Int,  errorCode: Int, error: String, errorText: String)
     {
         
         callIds()
@@ -1625,30 +1743,32 @@ public class AVPlayerCore: NSObject {
             callError()
         }
         
+        //print("videoWidth\(videoWidth)")
+        //print("videoHeight\(videoHeight)")
         
         
         
-        let localCurrentTime = getDate()
+//        let localCurrentTime = getDate()
+         currentTimeEpoch = (Date().timeIntervalSince1970 * 1000).roundToDecimal(3)
+        
         let gumlet_Environment_Key = UserDefaults.standard.value(forKey: "EnvironmentKey")
         
-        videAnaManager.callNetworkRequestAPI(request_id:networkRequestId, session_id:sessionId, user_id: uniqueId, source_id:gumlet_Environment_Key as! String, player_instance_id: playerInstanceId, request_start: requestStart, request_response_start: requestrResponseStart, request_response_end: requestResponseEnd, request_type: requestType, request_hostname: requestHostName, request_bytes_loaded: requestBytesLoaded, request_response_headers: requestResponseHeaders, request_media_duration_millis: requestMediaDuration_millis, request_video_width_pixels: videoWidth, request_video_height_pixels: videoHeight, error_code: errorCode, error: error, error_text: errorText, created_at: localCurrentTime)
+        videAnaManager.callNetworkRequestAPI(request_id:networkRequestId, session_id:sessionId, user_id: uniqueId, source_id:gumlet_Environment_Key as! String, player_instance_id: playerInstanceId, request_start: requestStart, request_response_start: requestrResponseStart, request_response_end: requestResponseEnd, request_type: requestType, request_hostname: requestHostName, request_bytes_loaded: requestBytesLoaded, request_response_headers: requestResponseHeaders, request_media_duration_millis: requestMediaDuration_millis, request_video_width_pixels: videoWidth, request_video_height_pixels: videoHeight, error_code: errorCode, error: error, error_text: errorText, created_at: currentTimeEpoch)
     }
     
     
-    
-    
     //MARK:- get play and pause time
-    func getPlay_Pause_Time() -> Double
+   public func getPlay_Pause_Time() -> Double
     {
         let currentTime = player.currentTime()
         let time = CMTimeGetSeconds(currentTime)
-        
-        
+        //print("time for sec:-\(time)")
+        //        let minutString = time / 60
+        //        let secondString = minutString.truncatingRemainder(dividingBy:60)
         let playTimeInMS = (time * 1000.0).roundToDecimal(2)
         
         
         return playTimeInMS
-        
     }
     
     //MARK:- Device Data
@@ -1656,9 +1776,7 @@ public class AVPlayerCore: NSObject {
         let info = NXGetLocalArchInfo()
         let device_Arch =  NSString(utf8String: (info?.pointee.name)!)
         return device_Arch! as String
-        
     }
-    
     
     //MARK:-- get video file Extension
     
@@ -1676,11 +1794,10 @@ public class AVPlayerCore: NSObject {
         if  let url = URL(string: videoUrl)
         {
             domain = url.host!
-            
+            //            //print("domain:--\(String(describing: domain))")
         }
         return domain
     }
-    
     
     //MARK:- calculate previous event time
     func getLastEventsTime()-> Float
@@ -1688,38 +1805,41 @@ public class AVPlayerCore: NSObject {
         var prevTime : Int = 0
         
         let prevEventTime = UserDefaults.standard.value(forKey: "localCurrentTimePrevEvent")as! String
+        //        //print("prevEventTime:-\(prevEventTime)")
         
         if prevEventTime == "0"
         {
-            print("prevEventTime")
+            //print("prevEventTime:--nulll")
         }
         else
         {
-            
+                    //print("prevEventTime:--\(prevEventTime)")
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"//this your string date format
             dateFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
             let dated = dateFormatter.date(from: prevEventTime )
-            
+           
+                        //print("dated:-\(String(describing: dated))")
             prevTime = Int(dated!.timeIntervalSince1970 * 1000)
-            
+                        print("prevTime:--\(prevTime)")
         }
-        
+        //        //print("localCurrentTimeEvent:-\(localCurrentTimeEvent)")
         let localCurrentTimeEvent = UserDefaults.standard.value(forKey: "localCurrentTime")as! String
-        
+                //print("localCurrentTimeEvent:-\(localCurrentTimeEvent)")
+//        let localCurrentTimeEvent = getDate()
         let dFormatter = DateFormatter()
         dFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"//this your string date format
         dFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
-        let dated1 = dFormatter.date(from: localCurrentTimeEvent)
-        
+        let dated1 = dFormatter.date(from: localCurrentTimeEvent)//getLocalCurrentTime()
+        //        //print("dated1:-\(String(describing: dated1))")
         let lTime = Int(dated1!.timeIntervalSince1970 * 1000)
-        
+               print("ltime:-\(lTime)")
         let diff = lTime - prevTime
-        
+               print("diff:-\(diff)")
         
         UserDefaults.standard.setValue(localCurrentTimeEvent, forKey: "localCurrentTimePrevEvent")
         
-        return Float(diff)
+        return Float(diff)//((localCurrentTimeEvent.timeIntervalSince(dated!)))
     }
     
     
@@ -1730,7 +1850,8 @@ public class AVPlayerCore: NSObject {
         let  video_total_time = CMTimeGetSeconds(seconds)
         let videoTotalDuration = video_total_time * 1000
         
-        
+        //        UserDefaults.standard .setValue(videoTotalDuration, forKey: "videoTotalDuration")
+        //        //print("videoTotalDuration:--\(videoTotalDuration)")
         return videoTotalDuration
     }
     
@@ -1746,7 +1867,7 @@ public class AVPlayerCore: NSObject {
             requestedTime, image, actualTime, result, error in
             guard let cgImage = image else
             {
-                
+                //print("No image!")
                 return
             }
             let uiImage = UIImage(cgImage: cgImage)
@@ -1756,14 +1877,19 @@ public class AVPlayerCore: NSObject {
     
     
     //MARK:-- video size
-    func getVideoResolution() -> CGSize? {
+  public func getVideoResolution() -> CGSize? {
         
+        //Float(abs(size!.width)).rounded()
+       
         let size = (self.player.currentItem?.presentationSize)
+        
+        
+//                print("size:-\(self.player.currentItem?.presentationSize)")
         return size
         
     }
     
-    func getScreenBounds() -> CGRect
+   public func getScreenBounds() -> CGRect
     {
         return UIScreen.main.bounds
     }
@@ -1784,9 +1910,9 @@ public class AVPlayerCore: NSObject {
         
         if UIScreen.main.bounds.width < UIScreen.main.bounds.height
         {
-            
+            //print("Portrait")
             deviceOrientation = "Portrait"
-            
+            //            //print("PortraitisFlat")
             
             if(isOrientationChange == true)
             {
@@ -1798,9 +1924,9 @@ public class AVPlayerCore: NSObject {
         }
         else if UIScreen.main.bounds.width > UIScreen.main.bounds.height
         {
-            
+            //print("Landscape")
             deviceOrientation = "Landscape"
-            
+            //            //print("Landscapeelese")
             
             if (isOrientationChange == false)
             {
@@ -1818,15 +1944,16 @@ public class AVPlayerCore: NSObject {
     }
     
     //MARK:-- get Upscale
-    func upScale(playerWidth:Float,videoWidth:Float) -> Float
+  public func upScale(playerWidth:Float,videoWidth:Float) -> Float
     {
         //playerwidth high and videoWidth less , means expand video width as per player width
         var upScale : Float = 0.0
-        
+        //        //print("playerWidth:\(playerWidth)")
+        //        //print("videowidth:\(videoWidth)")
         if (playerWidth > videoWidth)
         {
-            upScale = (abs((playerWidth - videoWidth)/videoWidth)).roundToDecimalFloat(2)
-            
+            upScale = (abs((playerWidth - videoWidth)/videoWidth)*100)//.roundToDecimalFloat(2)
+            //print("scalePerscentage:- upscale ;--\(upScale)")
         }
         else{
             upScale = 0.0
@@ -1835,15 +1962,16 @@ public class AVPlayerCore: NSObject {
     }
     
     //MARK:-- get downScale
-    func downScale(playerWidth:Float,videoWidth:Float) -> Float
+    public func downScale(playerWidth:Float,videoWidth:Float) -> Float
     {
         //playerwidth less and videoWidth high , means  compress video width as per player width
-        
+        //        //print("playerWidth:\(playerWidth)")
+        //        //print("videowidth:\(videoWidth)")
         var downScale : Float = 0.0
         if (playerWidth < videoWidth)
         {
-            downScale = (abs((playerWidth - videoWidth)/videoWidth)).roundToDecimalFloat(2)
-            
+            downScale = (abs((playerWidth - videoWidth)/videoWidth)*100)//.roundToDecimalFloat(2)
+            //print("scalePerscentage:- downscale;--\(downScale)")
         }
         else{
             downScale = 0.0
@@ -1861,28 +1989,244 @@ public class AVPlayerCore: NSObject {
         df.timeZone = NSTimeZone(name: "UTC") as TimeZone?
         
         let dateString = df.string(from: date)
+//        let dateString = Int(date.timeIntervalSince1970)
+        
+        //        //print("dateString:-\(dateString)")
         
         return dateString
     }
     
+   
+    public func currentEpochTime() -> Double
+    {
+        return (((Date().timeIntervalSince1970) * 1000)/1000).roundToDecimal(3)
+    }
+    
+    func getCurrentPlayheadTimeMs() -> Double {
+        return CMTimeGetSeconds(player.currentTime()) * 1000;
+    }
+    
+    //set the timer, which will update your progress bar. You can use whatever time interval you want
+    
+    func calculateBandwidthMetricFromAccessLog(log:AVPlayerItemAccessLog)
+    {
+        if isplaybackFinish == false{
+            if log != nil && log.events.count > 0
+            {
+                // https://developer.apple.com/documentation/avfoundation/avplayeritemaccesslogevent?language=objc
+                let event : AVPlayerItemAccessLogEvent? = log.events[log.events.count - 1]
+                
+                
+                
+                //            videoSourceUrl = UserDefaults.standard.value(forKey: "video_url") as! String
+                //            //print("videoSourceUrlEveNT:--\(videoSourceUrl)")
+                //
+                //            let videoURL = NSURL(string:videoSourceUrl)
+                //            getDownloadSize(url: videoURL! as URL, completion: { (size, error) in
+                //                if error != nil {
+                //                    //print("An error occurred when retrieving the download size: \(String(describing: error?.localizedDescription))")
+                //                } else {
+                //                    //print("The download size is \(size).")
+                //                }
+                //            })
+                
+                if (_lastTransferEventCount != log.events.count) {
+                    _lastTransferDuration = 0
+                    _lastTransferredBytes = 0
+                    _lastTransferEventCount = Int8(log.events.count);
+                }
+                
+                
+                
+                //            let date = NSDate() // current date
+                
+                //            let requestCompletedTime = date.timeIntervalSince1970
+                //            //print("requestCompletedTime:\(requestCompletedTime)")
+                //            let requestType = "media"
+                //            //print("requestType:\(requestType)")
+                //            let requestStartSecs : Double = requestCompletedTime - (event!.transferDuration - _lastTransferDuration)
+                //            //print("requestStartSecs:\(requestStartSecs)")
+                let request_start = Int(Date().timeIntervalSince1970)//getDate()//(requestStartSecs * 1000)
+                //            //print("requestStart:\(request_start)")
+                let request_response_start = Int(Date().timeIntervalSince1970)
+                //            //print("requestResponseStart:\(request_response_start)")
+                let request_response_end  = Int(Date().timeIntervalSince1970)//(requestCompletedTime * 1000)
+                //            //print("requestResponseEnd:\(request_response_end)")
+                let request_bytes_loaded :Int64 =  Int64(event!.numberOfBytesTransferred) - (_lastTransferredBytes)
+                //            //print("requestBytesLoaded:\(request_bytes_loaded)")
+                
+                let request_type = "event_requestcompleted"
+                let request_response_headers = "";
+                var requestHostName :String? = ""
+                
+                if event?.uri != nil
+                {
+                    requestHostName =  getHostName(videoUrl:(event?.uri)!)
+                    //            //print("requestHostName:\(String(describing: requestHostName))")
+                }
+                else{
+                    
+                    requestHostName = ""
+                }
+                
+                
+                
+                
+                //            let requestCurrentLevel = nil;
+                //            let requestMediaStartTime = event?.startupTime
+                //            //print("requestMediaStartTime:\(requestMediaStartTime)")
+                let requestMediaDuration :Int = Int(event!.segmentsDownloadedDuration)
+                //            //print("requestMediaDuration:\(requestMediaDuration)")
+                
+                //           let requestRenditionLists = nil;
+                //            indicatedBitrate = Float(event!.switchBitrate)
+                //            //print("bitrate:\(indicatedBitrate)")
+                //           [self dispatchBandwidthMetric:loadData withType:MUXSDKPlaybackEventRequestBandwidthEventCompleteType];
+                _lastTransferredBytes = Int64(event!.numberOfBytesTransferred);
+                _lastTransferDuration = event!.transferDuration;
+                
+                
+                callNetworkAPI(requestStart: request_start, requestrResponseStart: request_response_start, requestResponseEnd: request_response_end, requestType: request_type, requestHostName: requestHostName!, requestBytesLoaded: request_bytes_loaded, requestResponseHeaders: request_response_headers, requestMediaDuration_millis: requestMediaDuration, errorCode: 200, error: "", errorText: "Success")
+            }
+        }
+        else if isplaybackFinish == true{
+            
+            if log != nil && log.events.count > 0
+            {
+                // https://developer.apple.com/documentation/avfoundation/avplayeritemaccesslogevent?language=objc
+                let event : AVPlayerItemAccessLogEvent? = log.events[log.events.count - 1]
+                
+                if (_lastTransferEventCount != log.events.count) {
+                    _lastTransferDuration = 0
+                    _lastTransferredBytes = 0
+                    _lastTransferEventCount = Int8(log.events.count);
+                }
+                
+                
+                //            //print("------------------------------- requestResponseStart/requestResponseEnd/requestBytesLoaded to compute, the value are very close.
+                
+                
+                
+                
+                let request_start = Int(Date().timeIntervalSince1970)//getDate()
+                
+                let request_response_start = Int(Date().timeIntervalSince1970)//getDate()
+                
+                let request_response_end  = Int(Date().timeIntervalSince1970)
+                
+                let request_bytes_loaded :Int64 =  Int64(event!.numberOfBytesTransferred) - (_lastTransferredBytes)
+                
+                
+                let request_type = "event_requestcanceled"
+                let request_response_headers = "";
+                var requestHostName :String? = ""
+                
+                if requestHostName != nil{
+                    
+                    requestHostName =  getHostName(videoUrl:(event?.uri)!)
+                    //                //print("requestHostName:\(requestHostName)")
+                }
+                else{
+                    
+                    requestHostName = ""
+                }
+                
+                let requestMediaDuration :Int = Int(event!.segmentsDownloadedDuration)
+                //            //print("requestMediaDuration:\(requestMediaDuration)")
+                
+                
+                //            indicatedBitrate = Float(event!.switchBitrate)
+                //            //print("bitrate:\(indicatedBitrate)")
+                
+                _lastTransferredBytes = Int64(event!.numberOfBytesTransferred);
+                _lastTransferDuration = event!.transferDuration;
+                
+                
+                callNetworkAPI(requestStart: request_start, requestrResponseStart: request_response_start, requestResponseEnd: request_response_end, requestType: request_type, requestHostName: requestHostName!, requestBytesLoaded: request_bytes_loaded, requestResponseHeaders: request_response_headers, requestMediaDuration_millis: requestMediaDuration, errorCode: 200, error: "", errorText: "Success")
+            }
+            
+            
+        }
+        
+    }
+    
+    
+    
+    
+
+    
+    func checkVideoQualityChange()
+    {
+        let videoH  = UserDefaults.standard.value(forKey: "videoHeight") as! Float
+        let videoW = UserDefaults.standard.value(forKey: "videoWidth") as! Float
+        let size = getVideoResolution()
+        if videoW  != Float(abs(size!.width)).rounded() && videoH != Float(abs(size!.height)).rounded()
+        {
+           
+//            print("size:\(size)")
+            if (isVideoQualityChange == false)
+            {
+//                print("video change")
+                callVideoQualityChange()
+            }
+            
+        }
+        else
+        {
+           
+//            print("size:\(size)")
+            if isVideoQualityChange == true
+            {
+               
+                isVideoQualityChange = false
+            }
+        }
+    }
+    
+    
+    func checkMuteAnUnmute()
+    {
+        if videoMuted == false {
+            
+            if player.isMuted == true
+            {
+                print("mute")
+                callMute()
+                videoMuted = true
+            }
+        }
+        else if player.isMuted == false
+        {
+            if videoUnMuted == true
+            {
+                print("no mute")
+                callUnmute()
+                videoUnMuted = false
+            }
+            
+        }
+    }
+    
     func checkForSeekEvent(){
         
-        
+//                print("seek check")
         let playheadTimeElapsed :Double = (getCurrentPlayheadTimeMs() - Double(lastUpdateTime)) / 1000;
-        
+        //print("playheadTimeElapsed:-\(playheadTimeElapsed)")
         
         let wallTimeElapsed : Double = CFAbsoluteTimeGetCurrent() - Double(timeOfUpdate)
-        
+        //print("wallTimeElapsed:-\(wallTimeElapsed)")
         
         let drift = playheadTimeElapsed - wallTimeElapsed;
+        //print("drift:-\(drift)")
         
         if fabsf(Float(playheadTimeElapsed)) > 0.5 &&
             fabsf(Float(drift)) > 0.2 &&
-            (state == GumletPlayerState.GumletPlayerStatePaused.rawValue || state == GumletPlayerState.GumletPlayerStatePlay.rawValue) {
+            (state == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue || state == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue) {
             if isSeeking == false{
                 isSeeking = true
+                print("seeking start")
                 let play_current_time = getPlay_Pause_Time()
-                
+                //print("play_current_time\(play_current_time)")
                 UserDefaults.standard.setValue(play_current_time, forKey: "seekVideoStartTime")
                 let seekStartTimestamp = getDate()
                 UserDefaults.standard.setValue(seekStartTimestamp, forKey: "seekStartTimestamp")
@@ -1901,191 +2245,68 @@ public class AVPlayerCore: NSObject {
         timeOfUpdate = CFAbsoluteTimeGetCurrent()
     }
     
-    
-    func getCurrentPlayheadTimeMs() -> Double {
-        return CMTimeGetSeconds(player.currentTime()) * 1000;
-    }
-    
-    
-    
-    //set the timer, which will update your progress bar. You can use whatever time interval you want
-    
-    func calculateBandwidthMetricFromAccessLog(log:AVPlayerItemAccessLog)
+   public func getEventType(eventName :Int) -> String
     {
-        if isplaybackFinish == false{
-            if log != nil && log.events.count > 0
-            {
-                // https://developer.apple.com/documentation/avfoundation/avplayeritemaccesslogevent?language=objc
-                let event : AVPlayerItemAccessLogEvent? = log.events[log.events.count - 1]
-                
-                
-                
-                
-                
-                if (_lastTransferEventCount != log.events.count) {
-                    _lastTransferDuration = 0
-                    _lastTransferredBytes = 0
-                    _lastTransferEventCount = Int8(log.events.count);
-                }
-                
-                
-                
-                
-                let request_start = getDate()//(requestStartSecs * 1000)
-                
-                let request_response_start = getDate()
-                
-                let request_response_end  = getDate()
-                let request_bytes_loaded :Int64 =  Int64(event!.numberOfBytesTransferred) - (_lastTransferredBytes)
-                
-                
-                let request_type = "event_requestcompleted"
-                let request_response_headers = "";
-                var requestHostName :String? = ""
-                
-                if event?.uri != nil
-                {
-                    requestHostName =  getHostName(videoUrl:(event?.uri)!)
-                    
-                }
-                else{
-                    
-                    requestHostName = ""
-                }
-                
-                
-                
-                
-                let requestMediaDuration :Int = Int(event!.segmentsDownloadedDuration)
-                
-                _lastTransferredBytes = Int64(event!.numberOfBytesTransferred);
-                _lastTransferDuration = event!.transferDuration;
-                
-                
-                callNetworkAPI(requestStart: request_start, requestrResponseStart: request_response_start, requestResponseEnd: request_response_end, requestType: request_type, requestHostName: requestHostName!, requestBytesLoaded: request_bytes_loaded, requestResponseHeaders: request_response_headers, requestMediaDuration_millis: requestMediaDuration, errorCode: 200, error: "", errorText: "Success")
-            }
-            
-            
+        switch(eventName)
+        {
+        case 0:
+            return "event_player_setup"
+        case 1:
+            return "event_player_ready"
+        case 2:
+            return "event_play"
+        case 3:
+            return "event_playing"
+        case 4:
+            return "event_rebuffer_start"
+        case 5:
+            return "event_rebuffer_end"
+        case 6:
+            return "event_paused"
+        case 7:
+            return "event_end"
+        case 8:
+            return "event_video_change"
+        case 9:
+            return "event_device_orientation_changed"
+        case 10:
+            return "event_quality_change"
+        default:
+            return "no event"
         }
-        else if isplaybackFinish == true{
-            
-            if log != nil && log.events.count > 0
-            {
-                // https://developer.apple.com/documentation/avfoundation/avplayeritemaccesslogevent?language=objc
-                let event : AVPlayerItemAccessLogEvent? = log.events[log.events.count - 1]
-                
-                if (_lastTransferEventCount != log.events.count) {
-                    _lastTransferDuration = 0
-                    _lastTransferredBytes = 0
-                    _lastTransferEventCount = Int8(log.events.count);
-                }
-                
-                
-                
-                
-                
-                
-                let request_start = getDate()
-                
-                let request_response_start = getDate()
-                
-                let request_response_end  = getDate()
-                
-                let request_bytes_loaded :Int64 =  Int64(event!.numberOfBytesTransferred) - (_lastTransferredBytes)
-                
-                
-                let request_type = "event_requestcanceled"
-                let request_response_headers = "";
-                var requestHostName :String? = ""
-                
-                if requestHostName != nil{
-                    
-                    requestHostName =  getHostName(videoUrl:(event?.uri)!)
-                    
-                }
-                else{
-                    
-                    requestHostName = ""
-                }
-                
-                let requestMediaDuration :Int = Int(event!.segmentsDownloadedDuration)
-                
-                _lastTransferredBytes = Int64(event!.numberOfBytesTransferred);
-                _lastTransferDuration = event!.transferDuration;
-                
-                
-                callNetworkAPI(requestStart: request_start, requestrResponseStart: request_response_start, requestResponseEnd: request_response_end, requestType: request_type, requestHostName: requestHostName!, requestBytesLoaded: request_bytes_loaded, requestResponseHeaders: request_response_headers, requestMediaDuration_millis: requestMediaDuration, errorCode: 200, error: "", errorText: "Success")
-            }
-            
-            
-        }
-        
     }
     
-    
-    func getDownloadSize(url: URL, completion: @escaping (Int64, Error?) -> Void) {
-        let timeoutInterval = 5.0
-        var request = URLRequest(url: url,
-                                 cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-                                 timeoutInterval: timeoutInterval)
-        request.httpMethod = "HEAD"
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            
-            
-            let contentLength = response?.expectedContentLength ?? NSURLSessionTransferSizeUnknown
-            completion(contentLength, error)
-        }.resume()
-    }
-    
-    
-    func getSeekLatency()-> Float
+    public func getPreviousEventName(prevEventName:Int) -> String
     {
-        var prevTime : Int = 0
-        
-        let prevEventTime = UserDefaults.standard.value(forKey: "seekStartTimestamp")as! String
-        
-        if prevEventTime == "0"
+        switch (prevEventName)
         {
-            print("prevEventTime")
+        case 0:
+            return ""
+        case 1:
+            return "event_player_setup"
+        case 2:
+            return "event_player_ready"
+        case 3:
+            return "event_play"
+        case 4:
+            return "event_playing"
+        case 5:
+            return "event_rebuffer_start"
+        case 6:
+            return "event_rebuffer_end"
+        case 7:
+            return "event_paused"
+        default:
+            return "no event"
+            
         }
-        else
-        {
-            
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"//this your string date format
-            dateFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
-            let dated = dateFormatter.date(from: prevEventTime )
-            
-            prevTime = Int(dated!.timeIntervalSince1970 * 1000)
-            
-            
-            
-        }
         
-        let localCurrentTimeEvent = UserDefaults.standard.value(forKey: "seekTimeEnd")as! String
-        
-        
-        let dFormatter = DateFormatter()
-        dFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
-        dFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone?
-        let dated1 = dFormatter.date(from: localCurrentTimeEvent)
-        let lTime = Int(dated1!.timeIntervalSince1970 * 1000)
-        
-        
-        
-        let diff = lTime - prevTime
-        
-        
-        
-        UserDefaults.standard.setValue(localCurrentTimeEvent, forKey: "localCurrentTimePrevEvent")
-        
-        return Float(diff)
     }
+    
     
     deinit {
         
-        print("deinint")
+        //print("deinint")
         UserDefaults.standard.removeObject(forKey: "video_url")
         
         UserDefaults.standard.removeObject(forKey: "playBackId")

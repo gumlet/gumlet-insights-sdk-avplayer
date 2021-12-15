@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		19509CF427127C8C00CFFE4F /* UIDevice+type.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19509CF327127C8C00CFFE4F /* UIDevice+type.swift */; };
+		196E2D0A2769C4B1007F80F4 /* GumletMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196E2D082769C4B1007F80F4 /* GumletMachine.swift */; };
+		196E2D0B2769C4B1007F80F4 /* GumletTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 196E2D092769C4B1007F80F4 /* GumletTransition.swift */; };
 		1994325C272A7FCB002EC64F /* GumletInsightsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1994325B272A7FCA002EC64F /* GumletInsightsManager.swift */; };
 		19943261272A818C002EC64F /* GumletInsightsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19943260272A818C002EC64F /* GumletInsightsConfig.swift */; };
 		19B400DA271421EA0031498C /* Float+roundToDecimalFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19B400D8271421EA0031498C /* Float+roundToDecimalFloat.swift */; };
@@ -29,6 +31,8 @@
 
 /* Begin PBXFileReference section */
 		19509CF327127C8C00CFFE4F /* UIDevice+type.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIDevice+type.swift"; sourceTree = "<group>"; };
+		196E2D082769C4B1007F80F4 /* GumletMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GumletMachine.swift; sourceTree = "<group>"; };
+		196E2D092769C4B1007F80F4 /* GumletTransition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GumletTransition.swift; sourceTree = "<group>"; };
 		1994325B272A7FCA002EC64F /* GumletInsightsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GumletInsightsManager.swift; sourceTree = "<group>"; };
 		19943260272A818C002EC64F /* GumletInsightsConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GumletInsightsConfig.swift; sourceTree = "<group>"; };
 		19B400D8271421EA0031498C /* Float+roundToDecimalFloat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Float+roundToDecimalFloat.swift"; sourceTree = "<group>"; };
@@ -112,6 +116,8 @@
 		BC12D09126F083B50056D03C /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				196E2D082769C4B1007F80F4 /* GumletMachine.swift */,
+				196E2D092769C4B1007F80F4 /* GumletTransition.swift */,
 				BC12D09226F083C70056D03C /* KeychainSwift.swift */,
 				BC12D08626F07BE00056D03C /* HTTPClient.swift */,
 				BC12D09526F0E2360056D03C /* Constants.swift */,
@@ -214,6 +220,7 @@
 				BC12D08E26F082B10056D03C /* GumletInsightsIdentifiers.swift in Sources */,
 				BC12D08A26F07F0E0056D03C /* GumletInsightsDeviceData.swift in Sources */,
 				19509CF427127C8C00CFFE4F /* UIDevice+type.swift in Sources */,
+				196E2D0B2769C4B1007F80F4 /* GumletTransition.swift in Sources */,
 				BC12D07826F079670056D03C /* GumletInsightsUserData.swift in Sources */,
 				19FC03512722B35E0017F68C /* GumletInsightsCustomData.swift in Sources */,
 				BC12D09B26F1CDFC0056D03C /* Dictionary+QueryString.swift in Sources */,
@@ -223,6 +230,7 @@
 				19FC031D272132690017F68C /* GumletInsightsCustomPlayerData.swift in Sources */,
 				19B400DB271421EA0031498C /* Double+roundToDecimal.swift in Sources */,
 				1994325C272A7FCB002EC64F /* GumletInsightsManager.swift in Sources */,
+				196E2D0A2769C4B1007F80F4 /* GumletMachine.swift in Sources */,
 				BC12D08C26F0807E0056D03C /* GumletInsightsOSData.swift in Sources */,
 				BC12D09326F083C70056D03C /* KeychainSwift.swift in Sources */,
 				BC12D09626F0E2360056D03C /* Constants.swift in Sources */,

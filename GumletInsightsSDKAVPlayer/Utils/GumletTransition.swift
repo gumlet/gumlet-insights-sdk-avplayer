@@ -9,86 +9,212 @@ import Foundation
 
  class GumletTransition {
   
-    var states: String = ""
+    func transitionState(eventName:String, currentState:String,destinationState:String) -> Bool {
 
-    init(states: String) {
-        self.states = states
+            //print("[StateMachine] Transitioning from state \(currentState) to \(destinationState)")
 
-    }
-
-     func transitionState(destinationState:String) -> String {
-        let performTransition = getPlayerState(destinationState: destinationState)
-//        var states: String = ""
-        if performTransition {
-            print("[StateMachine] Transitioning from state \(self.states) to \(destinationState)")
-            states = destinationState
+        if (eventName == Events.isPlayerSetup.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue)
+        {
+            return true
         }
-        print("statesTranstioin:\(states)")
-        return states
+        
+        else if (eventName == Events.isPlayerReady.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isPlayerReady.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isPlay.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isPlay.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isPlay.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isPlaying.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isPlaying.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+
+        
+        else if (eventName == Events.isEventError.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateError.rawValue)
+        {
+            return true
+        }
+
+        else if (eventName == Events.isBufferingStart.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingStart.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingStart.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingStart.rawValue || currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isBufferingEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isMute.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isMute.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isUnMute.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isUnMute.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isSeek.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isSeek.rawValue || currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isSeek.rawValue || currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
+        {
+            return true
+        }
+        else if (eventName == Events.isSeek.rawValue || currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue)
+        {
+            return true
+        }
+
+        
+        else if (eventName == Events.isPaused.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+        {
+            return true
+        }
+
+        else if (eventName == Events.isPaused.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isDeviceOrientationChange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isDeviceOrientationChange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isDeviceOrientationChange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateReady.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isDeviceOrientationChange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isVideochange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue)
+        {
+            return true
+        }
+        
+        
+        else if (eventName == Events.isQualityChange.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue)
+        {
+            return true
+        }
+        
+        else if (eventName == Events.isEnd.rawValue && currentState == GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue && destinationState == GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue)
+        {
+            return true
+        }
+        else
+        {
+            return false
+        }
     }
-    
-    
-    
-    func getPlayerState(destinationState:String) -> Bool {
-        
-        print("destinationState:\(destinationState)")
-       switch (destinationState) {
-            
-       case GumletPlayerStateMachine.GumletPlayerStateViewinit.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateReady.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue, GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue :
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePlay.rawValue:
-            return true
-        
-//       case GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue:
-//        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue, GumletPlayerStateMachine.GumletPlayerStateBuffering.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue, GumletPlayerStateMachine.GumletPlayerStateSeek.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateMute.rawValue:
-        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue, GumletPlayerStateMachine.GumletPlayerStateMute.rawValue:
-        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateUnMute.rawValue:
-        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePlaying.rawValue, GumletPlayerStateMachine.GumletPlayerStateUnMute.rawValue:
-        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue:
-            return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue, GumletPlayerStateMachine.GumletPlayerStateUnMute.rawValue:
-        return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStatePaused.rawValue, GumletPlayerStateMachine.GumletPlayerStateMute.rawValue:
-        return true
-       
-       case GumletPlayerStateMachine.GumletPlayerStateViewEnd.rawValue:
-          return true
-        
-       case GumletPlayerStateMachine.GumletPlayerStateError.rawValue:
-               return true
-           
-       default:
-          return true
-       }
-   }
 }
 
 

@@ -9,7 +9,7 @@ import Foundation
 
 public struct GumletInsightsCustomData {
     
-   public var customUserId: String
+    public var customUserId: String
     public var customData1: String
     public var customData2: String
     public var customData3: String

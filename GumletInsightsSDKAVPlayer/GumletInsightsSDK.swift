@@ -22,11 +22,11 @@ public class GumletInsightsSDK {
     
     private static let core = AVPlayerCore()
     public static func version() -> String {
-        return "1.0.0"
+        return "AVPlayer_1.0.0"
     }
     
     public static func browser_version() -> String {
-        return "1.0.0"
+        return "AVPlayer_1.0.0"
     }
     
     
@@ -35,10 +35,21 @@ public class GumletInsightsSDK {
         self.player = playerViewController.player
         self.userData = userData
         self.customPlayerData = customPlayerData
+        UserDefaults.standard.setValue(self.environmentKey, forKey: "environmentKey")
+        //self.customData =
         //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
         //        DispatchQueue.global(qos: .utility).async {
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey)
+        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
         //        }
+    }
+    
+    public class func updateDataAVPlayerViewController(_ playerViewController:AVPlayerViewController, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomVideoData? = nil,customPlayerData:GumletInsightsCustomPlayerData? = nil ) {
+        self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
+        self.player = playerViewController.player
+        self.userData = userData
+        self.customPlayerData = customPlayerData
+        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+       
     }
     
     public class func initAVPlayerLayer(_ playerLayer:AVPlayerLayer, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomPlayerData? = nil, config: GumletInsightsConfig) {
@@ -47,9 +58,25 @@ public class GumletInsightsSDK {
         self.userData = userData
         self.customData = customData
         //        DispatchQueue.global(qos: .utility).async {
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey)
+        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
         //        }
     }
+    
+    
+    public class func updateDataAVPlayerLayer(_ playerLayer:AVPlayerLayer, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomVideoData? = nil,customPlayerData:GumletInsightsCustomPlayerData? = nil ) {
+        self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
+        self.player = playerLayer.player
+        self.userData = userData
+        self.customPlayerData = customPlayerData
+        self.customData = customData
+        
+        
+        //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
+        //        DispatchQueue.global(qos: .utility).async {
+        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+        //        }
+    }
+    
     
     
     

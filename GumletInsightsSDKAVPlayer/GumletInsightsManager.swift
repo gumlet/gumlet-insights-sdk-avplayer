@@ -10,28 +10,24 @@ import WebKit
 
 struct GumletInsightsManager {
     
+    
+   
         // MARK:- constants
-        
         let event_family = ["session","session_event", "player_init","network_request"]
         let gumletSDK_version = "1.0.0"
-        let video_base_url = "http://ingest.gumlytics.com?"
+        let video_base_url = "https://ingest.gumlytics.com?"
         
-    
         //MARK:--get device information
         func getUserAgent() -> String{
            
             var darwinid:String = ""
             let appName =  Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as? String
-            
             let platform = UIDevice.current.systemName
             let modelID = UIDevice().type
-           
             let operationSystemVersion = ProcessInfo.processInfo.operatingSystemVersionString
-         
             let bundle = Bundle(identifier: "com.apple.CFNetwork")
             let versionAny = bundle?.infoDictionary?[kCFBundleVersionKey as String]
             let CFversion = versionAny as? String
-            
             var systemInfo = utsname()
             uname(&systemInfo)
             let machineMirror = Mirror(reflecting: systemInfo.release)
@@ -40,14 +36,14 @@ struct GumletInsightsManager {
                       value != 0 else {
                     return identifier
                 }
-                
                 darwinid = identifier + String(UnicodeScalar(UInt8(value)))
                 return darwinid
             }
-            
             let userAgent = ("\(String(describing: appName!)),\(platform),\(modelID),\(operationSystemVersion),CFNetwork/ \(CFversion!),Darvin/\(darwinid)")
             return userAgent
-          
+            
+            //        User-Agent: <AppName/<version> (<iDevice platform>; <Apple model identifier>; iOS/<OS version>) CFNetwork/<version> Darwin/<version>
+            
         }
         
         
@@ -56,7 +52,7 @@ struct GumletInsightsManager {
         {
             let modelID = UIDevice().type
             let bundleId = Bundle.main.bundleIdentifier!
-            let browser_version = 1.0
+            let browser_version = "AVPlayer.1.0.0"
             let customer_data1 = "data_1"
             
             let originalString = "\(video_base_url)&event_family=\(event_family[0])&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&viewer_client_version=\(gumletSDK_version)&meta_device_architecture=\(metaDeviceArch)&user_name=\(userName)&user_email=\(userEmail)&user_city=\(userCity)&meta_operating_system_version=\(version)&meta_operating_system=\(platform)&meta_device_category=\(deviceCategory)&meta_device_manufacturer=\(deviceManufacturer)&meta_device_name=\(modelID)&meta_device_display_width=\(Float(deviceWidth))&meta_device_display_height=\(Float(deviceHeight))&meta_device_display_dpr=\(Float(deviceDisplayPPI))&meta_device_is_touchscreen=\(deviceIsTouchable)&meta_browser=\(bundleId)&meta_browser_version=\(browser_version)&z=\(localCurrentTime)&orientation=\(orientation)&user_phone=\(userPhone)&user_address_line1=\(userAddLineOne)&user_address_line2=\(userAddLineTwo)&user_state=\(userState)&user_country=\(userCountry)&user_zipcode=\(userZipCode)&custom_user_id=\(customUserId)&custom_data_1=\(customer_data1)&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")"
@@ -86,88 +82,48 @@ struct GumletInsightsManager {
         {
             let muteProp = muted
             var originalString :String = ""
-          
-            
-          
             if (muteProp == false)
             {
                             if quality == "true"
                             {
                                 originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)&quality=\(quality)"
-                                
-                               
                             }
                             else
                             {
-              
-                
-                    originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)"
-                            
-                     
-                    }
+                                originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)"
+                        }
             }
             else if (muteProp == true)
             {
                             if quality == "true"
                             {
                                 originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&muted=\(muted)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("customer_data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)&quality=\(quality)"
-                                
-                             
-                        }
-                
-                    originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&muted=\(muted)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("customer_data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)"
-                
-                
-                
-            }
-            
-            
-          
-            
+                                }
+                originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&muted=\(muted)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("customer_data1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")&error=\(errorTitle)&error_code=\(errorCode)&error_text=\(errorMsg)"
+                }
             let urlString = originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            /*&custom_content_type=&custom_video_duration_millis=&custom_encoding_variant=&custom_video_language=&custom_video_id=&custom_video_series=&custom_video_producer=&custom_video_title=&custom_video_variant_name=&custom_video_variant="&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&bitrate_mbps=\(bitrateMbps)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&*/
             print("urlString:----\(String(describing: urlString!))")
             performRequest(urlString:urlString!)
         }
         
-        
-        
+        //MARK:- Event Api call
         func callSeekEventAPI(eventId:String, sessionId:String, userId:String, playbackId:String, playerInstaceId:String, event:String,seekingtime:Double, seekedTime:Double, startPlayTimeInMS:Double, videoDownScale:Float, videoUpscale:Float, bitrateMbps:Float, playerRemotePlayed:String, videoSourceDomain:String, videoTotalDuration:Double, videoWidthPixel:Float, videoHeightPixel:Float, videoSourceUrl:String, videoSourceHostName:String, videoSourceType:String, muted:Bool, previousEvent:String, previousEventTime:Float, gumletEnvironmentKey:String,localCurrentTime:Double,orientation:String,orientation_from:String,fullscreen:Bool,quality:String)
         {
             let muteProp = muted
             var originalString :String = ""
-            //        let videoQualityChange = quality
-            
-            
             if (muteProp == false)
             {
-                
-                
-                    originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&from=\(seekingtime)&to=\(seekedTime)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data_1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")"
+                originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)&from=\(seekingtime)&to=\(seekedTime)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data_1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")"
                 
             }
             else if (muteProp == true)
             {
-               
-                    originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)from=\(seekingtime)&to=\(seekedTime)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&muted=\(muted)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data_1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")"
-                
-            }
-            
-            
-            
-            
+               originalString = "\(video_base_url)&event_family=\(event_family[1])&event_id=\(eventId)&session_id=\(sessionId)&property_id=\(gumletEnvironmentKey)&user_id=\(userId)&playback_id=\(playbackId)&player_instance_id=\(playerInstaceId)&event=\(event)from=\(seekingtime)&to=\(seekedTime)&playback_time_instant_millis=\(startPlayTimeInMS)&player_remote_played=\(playerRemotePlayed)&video_total_duration_millis=\(videoTotalDuration)&video_source_url=\(videoSourceUrl)&video_source_hostname=\(videoSourceHostName)&video_source_format=\(videoSourceType)&muted=\(muted)&previous_event=\(previousEvent)&millis_from_previous_event=\(previousEventTime)&video_width_pixels=\(videoWidthPixel)&video_height_pixels=\(videoHeightPixel)&bitrate_mbps=\(bitrateMbps)&z=\(localCurrentTime)&orientation=\(orientation)&orientation_from=\(orientation_from)&fullscreen=\(fullscreen)&video_downscale_percentage=\(videoDownScale)&video_upscale_percentage=\(videoUpscale)&custom_content_type=\("xyz")&custom_video_duration_millis=\("134598")&custom_encoding_variant=\("abc")&custom_video_language=\("Hindi")&custom_video_id=\("qwdr32efcSA")&custom_video_series=\("1A")&custom_video_producer=\("khush")&custom_video_title=\("Animated")&custom_video_variant_name=\("alot")&custom_video_variant=\("super")&custom_data_1=\("data_1")&custom_data_2=\("data_2")&custom_data_3=\("data_3")&custom_data_4=\("data_4")&custom_data_5=\("data_5")&custom_data_6=\("data_6")&custom_data_7=\("data_7")&custom_data_8=\("data_8")&custom_data_9=\("data_9")&custom_data_10=\("data_10")"
+                }
             let urlString = originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-          
             print("urlString:----\(String(describing: urlString!))")
             performRequest(urlString:urlString!)
         }
-        
-        
-        
-       
-        
-       
-        
         
         //MARK:- call Network Request API
         func callNetworkRequestAPI(request_id:String,
@@ -191,61 +147,45 @@ struct GumletInsightsManager {
                                    created_at:Double)
         {
             let originalString = "\(video_base_url)&event_family=\(event_family[3])&request_id=\(request_id)&player_instance_id=\(player_instance_id)&property_id=\(source_id)&session_id=\(session_id)&user_id=\(user_id)&request_start=\(request_start)&request_response_start=\(request_response_start)&request_response_end=\(request_response_end)&request_type=\(request_type)&request_hostname=\(request_hostname)&request_bytes_loaded=\(request_bytes_loaded)&request_response_headers=\(request_response_headers)&request_media_duration_millis=\(request_media_duration_millis)&request_video_width_pixels=\(request_video_width_pixels)&request_video_height_pixels=\(request_video_height_pixels)&error_code=\(error_code)&error_text=\(error_text)&error=\(error)&z=\(created_at)"
-          
-            
+            //&custom_user_id=&player_language_code=\(playerLanguageCode)
             let urlString = originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            print("urlString:----\(String(describing: urlString))")
+            //print("urlString:----\(String(describing: urlString))")
             performRequest(urlString:urlString!)
         }
         
-        
+    
         //MARK:- call Perform Reqeust
-        
         func performRequest(urlString:String)
         {
-           
-            
             if let url = URL(string: urlString)
             {
-               
+               //create a url session
                 let config = URLSessionConfiguration.default
-              
+                // default User-Agent: "User-Agent" = "UserAgentDemo/1 CFNetwork/1121.2.1 Darwin/19.2.0";
+                // custom User-Agent
                 let userAgent = getUserAgent()
-             
                 config.httpAdditionalHeaders = ["User-Agent": userAgent]
                 let session = URLSession(configuration: config)
-                
-            
+                //give the session  a task
                 let task = session.dataTask(with: url,completionHandler:
-                                                
-                                                {  (data, response, error) in
-                                                    
-                                                    if error != nil
-                                                    {
-                                                        //print("error:----\(error!)")
-                                                        return
-                                                    }
-                                                    
-                                                    //print("data:-------\(String(describing: data))")
-                                                    
-                                                    if let data = data {
-                                                        //print("data:-\(data)")
-                                                        do{
-                                                            
-                                                 
-                                                            _ = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
-                                                            //print ("data = \(jsonResponse)")
-                                                        }
-                                                        catch  {
-                                                            //print ("OOps not good JSON formatted response")
-                                                        }
-                                                    }
-                                                })
+                    {  (data, response, error) in
+                        if error != nil
+                            {
+                                return
+                            }
+                        if let data = data {
+                            do{
+                                let jsonResponse = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
+                                }
+                            catch  {
+                                    ////print ("OOps not good JSON formatted response")
+                                    }
+                                }
+                            })
                 // start the task
                 task.resume()
             }
         }
-        
     }
 
 

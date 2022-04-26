@@ -21,6 +21,9 @@ import Foundation
         case GumletPlayerStatePlaying = "Playing"
         case GumletPlayerStatePaused = "Paused"
         case GumletPlayerStateError = "Error"
+        case GumletPlayerStateOrientationChange = "OrientationChange"
+        case GumletPlayerStateVideoChange = "VideoChange"
+        case GumletPlayerStateVideoQualityChange = "VideoQualityChange"
         case GumletPlayerStateViewEnd = "End"
     }
     enum Events : String

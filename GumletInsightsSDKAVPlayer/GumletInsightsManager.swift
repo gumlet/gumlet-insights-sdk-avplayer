@@ -17,7 +17,7 @@ struct GumletInsightsManager {
         let gumletSDK_version = "1.0.0"
         let video_base_url = "https://ingest.gumlytics.com?"
         
-        // MARK:- added by Amby for propertyId verification
+        // MARK:- propertyId verification
         let validate_property_api = "https://api.gumlet.com/v1/insights/property/validate?property_id="
     
     
@@ -190,6 +190,50 @@ struct GumletInsightsManager {
                 task.resume()
             }
         }
+    
+        // MARK:- propertyId verification
+        func verifyPropertyId(propertyId: String, completion: @escaping (_ isValidated: Bool) -> Void) {
+            if propertyId.isEmpty {
+                completion(false)
+                return
+            }
+                
+            let urlString = "\(self.validate_property_api)\(propertyId)"
+                if let url = URL(string: urlString) {
+                    let config = URLSessionConfiguration.default
+                    let userAgent = getUserAgent()
+                    config.httpAdditionalHeaders = ["User-Agent": userAgent]
+                    let session = URLSession(configuration: config)
+                 
+                    let task = session.dataTask(with: url,completionHandler: {  (data, response, error) in
+                        if error != nil {
+                            //print("error:----\(error!)")
+                            completion(false)
+                            return
+                        }
+                        
+                        if let data = data {
+                            //print("data:-\(data)")
+                            if let propertyIDValidation = try? JSONDecoder().decode(PropertyIDValidation.self, from: data) {
+                                completion(propertyIDValidation.validated)
+                                return
+                            }
+                            else {
+                                completion(false)
+                                return
+                            }
+                        }
+                    })
+                    // start the task
+                    task.resume()
+                }
+            }
+        //End
+    }
+
+    // MARK:- property struct
+    struct PropertyIDValidation: Codable {
+        let validated: Bool
     }
 
 

@@ -19,6 +19,7 @@ public class GumletInsightsSDK {
     private static var customPlayerData: GumletInsightsCustomPlayerData? = nil
     private static var customData:GumletInsightsCustomData? = nil
     
+    private static var gumletInsightsManager = GumletInsightsManager()
     
     private static let core = AVPlayerCore()
     public static func version() -> String {
@@ -31,50 +32,75 @@ public class GumletInsightsSDK {
     
     
     public class func initAVPlayerViewController(_ playerViewController:AVPlayerViewController, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomVideoData? = nil,customPlayerData:GumletInsightsCustomPlayerData? = nil,  config: GumletInsightsConfig) {
-        self.environmentKey = config.proprtyId
-        self.player = playerViewController.player
-        self.userData = userData
-        self.customPlayerData = customPlayerData
-        UserDefaults.standard.setValue(self.environmentKey, forKey: "environmentKey")
-        //self.customData =
-        //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
-        //        DispatchQueue.global(qos: .utility).async {
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
-        //        }
+        
+        gumletInsightsManager.verifyPropertyId(propertyId: config.proprtyId, completion: {(isValidated) in
+            if isValidated {
+                self.environmentKey = config.proprtyId
+                self.player = playerViewController.player
+                self.userData = userData
+                self.customPlayerData = customPlayerData
+                UserDefaults.standard.setValue(self.environmentKey, forKey: "environmentKey")
+                //self.customData =
+                //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
+                //        DispatchQueue.global(qos: .utility).async {
+                core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+                //        }
+            }
+            else {
+                print("Error!! -- PropertyId '\(config.proprtyId)' is not validated. Get new Property Id from dashboard.")
+            }
     }
     
     public class func updateDataAVPlayerViewController(_ playerViewController:AVPlayerViewController, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomVideoData? = nil,customPlayerData:GumletInsightsCustomPlayerData? = nil ) {
-        self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
-        self.player = playerViewController.player
-        self.userData = userData
-        self.customPlayerData = customPlayerData
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+            gumletInsightsManager.verifyPropertyId(propertyId: config.proprtyId, completion: {(isValidated) in
+                if isValidated {
+                    self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
+                    self.player = playerViewController.player
+                    self.userData = userData
+                    self.customPlayerData = customPlayerData
+                    core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+                }
+                else {
+                    print("Error!! -- PropertyId '\(config.proprtyId)' is not validated. Get new Property Id from dashboard.")
+                }
        
     }
     
     public class func initAVPlayerLayer(_ playerLayer:AVPlayerLayer, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomPlayerData? = nil, config: GumletInsightsConfig) {
-        self.environmentKey = config.proprtyId
-        self.player = playerLayer.player
-        self.userData = userData
-        self.customData = customData
-        //        DispatchQueue.global(qos: .utility).async {
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
-        //        }
+            gumletInsightsManager.verifyPropertyId(propertyId: config.proprtyId, completion: {(isValidated) in
+                if isValidated {
+                    self.environmentKey = config.proprtyId
+                    self.player = playerLayer.player
+                    self.userData = userData
+                    self.customData = customData
+                    //        DispatchQueue.global(qos: .utility).async {
+                    core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+                    //        }
+                }
+                else {
+                    print("Error!! -- PropertyId '\(config.proprtyId)' is not validated. Get new Property Id from dashboard.")
+                }
     }
     
     
     public class func updateDataAVPlayerLayer(_ playerLayer:AVPlayerLayer, userData:GumletInsightsUserData? = nil, customData:GumletInsightsCustomData? = nil,customVideoData:GumletInsightsCustomVideoData? = nil,customPlayerData:GumletInsightsCustomPlayerData? = nil ) {
-        self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
-        self.player = playerLayer.player
-        self.userData = userData
-        self.customPlayerData = customPlayerData
-        self.customData = customData
-        
-        
-        //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
-        //        DispatchQueue.global(qos: .utility).async {
-        core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
-        //        }
+            gumletInsightsManager.verifyPropertyId(propertyId: config.proprtyId, completion: {(isValidated) in
+                if isValidated {
+                    self.environmentKey = UserDefaults.standard.value(forKey:"environmentKey") as! String
+                    self.player = playerLayer.player
+                    self.userData = userData
+                    self.customPlayerData = customPlayerData
+                    self.customData = customData
+                    
+                    
+                    //        playerViewController.addObserver(core, forKeyPath: #keyPath(AVPlayerViewController.videoBounds), options: [.old, .new], context: nil)
+                    //        DispatchQueue.global(qos: .utility).async {
+                    core.setupPlayer(playerAV: self.player!, propertyId: self.environmentKey,userData: self.userData!, customerPlayerData: self.customPlayerData!)
+                    //        }
+                }
+                else {
+                    print("Error!! -- PropertyId '\(config.proprtyId)' is not validated. Get new Property Id from dashboard.")
+                }
     }
     
     

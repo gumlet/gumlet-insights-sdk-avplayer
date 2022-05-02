@@ -17,6 +17,10 @@ struct GumletInsightsManager {
         let gumletSDK_version = "1.0.0"
         let video_base_url = "https://ingest.gumlytics.com?"
         
+        // MARK:- added by Amby for propertyId verification
+        let validate_property_api = "https://api.gumlet.com/v1/insights/property/validate?property_id="
+    
+    
         //MARK:--get device information
         func getUserAgent() -> String{
            
